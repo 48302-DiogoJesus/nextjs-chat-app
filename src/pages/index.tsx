@@ -1,4 +1,4 @@
-import { Button, CircularProgress } from "@mui/material";
+import { Button, CircularProgress } from "@chakra-ui/react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 
@@ -21,7 +21,7 @@ export default function HomePage() {
         {
           session.status === "loading"
             ?
-            <CircularProgress />
+            <CircularProgress isIndeterminate color='green.300' />
             :
             <>
               {
@@ -41,13 +41,12 @@ export default function HomePage() {
       {
         session.status === "authenticated"
           ?
-          <Button
-            color="primary"
+          <button
+            className="btn"
             onClick={() => router.push("/chat")}
-            variant="outlined"
           >
             Join Chat
-          </Button>
+          </button>
           : null
       }
     </div>

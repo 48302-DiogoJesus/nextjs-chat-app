@@ -8,3 +8,24 @@
         font-family: 'Roboto';
     }
 }
+
+@layer components {
+    .btn {
+        @apply bg-gray-700 px-4 py-2 rounded-md text-white font-bold hover:bg-gray-800
+        shadow-lg text-xl hover:-translate-y-[1px] transition-all flex items-center justify-center;
+    }
+
+    .input {
+        @apply
+        bg-gray-800
+        p-3 rounded-md
+        hover:bg-gray-700
+        transition-all duration-300
+        text-gray-300
+        outline-none;
+    }
+
+    .input:focus {
+        outline: 2px solid darkred;
+    }
+}

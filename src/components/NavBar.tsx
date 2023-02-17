@@ -1,7 +1,6 @@
-import { Button, CircularProgress } from "@mui/material";
+import { Button, CircularProgress } from "@chakra-ui/react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
 
 export default function NavBar() {
 	const session = useSession()
@@ -11,17 +10,18 @@ export default function NavBar() {
 		<nav
 			id="navbar"
 			className="
-                w-screen
-                flex items-center justify-between
-                p-4
-                bg-gray-800
-                shadow-xl
-            "
+					w-screen
+					flex items-center justify-between
+					p-4
+					bg-gray-800
+					shadow-xl
+			"
 		>
 			<span
 				className="
+					opacity-60
 					text-4xl text-gray-400 font-extrabold
-					hover:cursor-pointer hover:text-gray-300
+					hover:cursor-pointer hover:opacity-50
 				"
 				onClick={() => router.push("/")}
 			>
@@ -31,17 +31,16 @@ export default function NavBar() {
 			{
 				session.status === "loading"
 					?
-					<CircularProgress />
+					<CircularProgress isIndeterminate color='green.300' />
 					:
-					<Button
-						variant="contained"
-						className="hover:bg-gray-700"
+					<button
+						className="btn"
 
 						onClick={() => session.status === "unauthenticated" ? signIn('github') : signOut()}
 					>
 						<span className="mr-2">{github_svg}</span>
 						<span>{session.status === "unauthenticated" ? 'Sign In' : 'Sign Out'}</span>
-					</Button>
+					</button>
 			}
 		</nav>
 	)
