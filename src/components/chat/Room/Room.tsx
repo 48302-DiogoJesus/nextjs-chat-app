@@ -103,7 +103,7 @@ export default function Room(
           <div
             id="chat-contents"
             className="
-              m-5 max-h-[45vh] md:max-h-[60vh]
+              m-5 max-h-[45vh] md:max-h-[53vh]
               flex flex-col items-start justify-start
               overflow-auto
             "

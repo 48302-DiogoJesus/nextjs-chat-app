@@ -15,7 +15,6 @@ export default function RoomsTab(
       id="rooms-tab"
       className="
         flex flex-col justify-center
-        overflow-auto
         mx-7 my-8
       "
     >
@@ -37,7 +36,9 @@ export default function RoomsTab(
         <hr className="border-gray-700 my-4 w-[80%]" />
       </div>
 
-      <div className="flex flex-row lg:flex-col gap-3">
+      <div className="
+        flex flex-row lg:flex-col gap-3 
+      ">
         {
           !rooms
             ?
