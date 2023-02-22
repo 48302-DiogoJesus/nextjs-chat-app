@@ -6,19 +6,19 @@ import { useState } from "react";
 import { MessageModel } from "@/model/MessageModel";
 import { useSession } from "next-auth/react";
 import { Button } from "@chakra-ui/react";
+import copyIcon from '@/resources/copy-icon.svg';
+import { IconButton, Tooltip } from "@mui/joy";
+import { trpc } from "@/utils/trpc";
 
 type RoomProps = {
-  room: RoomModel | null
+  room: RoomModel
 }
 
 export default function Room(
   { room }: RoomProps
 ) {
-
   const session = useSession();
   const me = session.data?.user ?? null
-
-  console.log(me)
 
   const [messages, setMessages] = useState<Array<MessageModel> | null>([
     {
@@ -92,8 +92,9 @@ export default function Room(
           className="absolute top-0 left-0 p-7"
         >
           <div id="top-chat-room-info" className=" text-gray-200">
-            <h1 className="my-2 text-3xl font-bold">
+            <h1 className="my-2 text-3xl font-bold flex gap-3">
               {room?.name}
+              <Image src={copyIcon} alt={"Copy Room Name"} className="hover:cursor-pointer hover:scale-105" />
             </h1>
             <p className="text-lg text-gray-500">
               ({room?.users.map(member => `${member.name}`).join(', ')})
@@ -138,8 +139,6 @@ export default function Room(
 function Message(
   { message, isMine }: { message: MessageModel, isMine: boolean }
 ) {
-  console.log(message.createdAt.toString())
-
   return (
     <div
       className={`

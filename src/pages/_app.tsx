@@ -6,8 +6,9 @@ import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import NavBar from '@/components/NavBar';
 import { SessionProvider } from "next-auth/react"
+import { trpc } from '../utils/trpc'
 
-export default function App({ Component, pageProps }: AppProps) {
+function App({ Component, pageProps }: AppProps) {
     return (
         <SessionProvider session={pageProps.session}>
             <NavBar />
@@ -15,3 +16,5 @@ export default function App({ Component, pageProps }: AppProps) {
         </SessionProvider>
     )
 }
+
+export default trpc.withTRPC(App)

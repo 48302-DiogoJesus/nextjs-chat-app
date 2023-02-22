@@ -11,15 +11,14 @@ datasource db {
 }
 
 model Room {
-  id        String   @id @default(cuid())
-  name      String
-  users     User[]
+  name      String @id
+  users     User[]   @relation("RoomUsers")
   createdAt DateTime @default(now())
 }
 
 // Next-Auth Models/Tables
 model Account {
-  id                String  @id @default(cuid())
+  id                Int     @id @default(autoincrement())
   userId            String
   type              String
   provider          String
@@ -38,22 +37,22 @@ model Account {
 }
 
 model Session {
-  id           String   @id @default(cuid())
+  id           Int      @id @default(autoincrement())
   sessionToken String   @unique
-  userId       String
   expires      DateTime
+  userId       String
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model User {
   id            String    @id @default(cuid())
   name          String?
-  email         String?   @unique
+  email         String   @unique
   emailVerified DateTime?
   image         String?
   accounts      Account[]
   sessions      Session[]
-  Room          Room      @relation(fields: [id], references: [id])
+  rooms     Room[]   @relation("RoomUsers")
 }
 
 model VerificationToken {

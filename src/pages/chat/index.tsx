@@ -1,11 +1,13 @@
 import Room from "@/components/chat/Room/Room"
 import RoomsTab from "@/components/chat/RoomsTab"
 import { RoomModel } from "@/model/RoomModel"
+import { trpc } from "@/utils/trpc"
 import { GetServerSidePropsResult } from "next"
 import { getServerSession, type Session } from "next-auth"
 import { getSession } from "next-auth/react"
 import { AppContext } from "next/app"
 import { AppContextType, NextPageContext } from "next/dist/shared/lib/utils"
+import dynamic from "next/dynamic"
 import { useRouter } from "next/router"
 import { useEffect, useState } from "react";
 import authOptions from "../api/auth/[...nextauth]"
@@ -14,47 +16,13 @@ type ChatPageProps = {
 	session: Session
 }
 
-export default function ChatPage(
+// CSR only
+export default dynamic(() => Promise.resolve(ChatPage), { ssr: false })
+
+function ChatPage(
 	{ session }: ChatPageProps
 ) {
-	const [rooms, setRooms] = useState<Array<RoomModel> | null>([
-		{
-			id: "1",
-			name: "Room 1",
-			users: [
-				{
-					name: "John Doe",
-					email: "john.doe@example.com"
-				},
-				{
-					name: "Maria Alf",
-					email: "maria.alf.203@example.com"
-				},
-				{
-					name: "Jane Doe",
-					email: "jane@example.com"
-				}
-			]
-		},
-		{
-			id: "2",
-			name: "Room 2",
-			users: [
-				{
-					name: "Samantha",
-					email: "samantha@example.com"
-				},
-				{
-					name: "George",
-					email: "george.alf.203@example.com"
-				},
-				{
-					name: "Martha James",
-					email: "martha-james@example.com"
-				}
-			]
-		}
-	])
+	const [selectedRoom, setSelectedRoom] = useState<RoomModel | null>(null)
 
 	return (
 		<div
@@ -63,8 +31,8 @@ export default function ChatPage(
 				flex flex-col lg:flex-row items-center lg:items-start justify-center
 				"
 		>
-			<RoomsTab rooms={rooms} />
-			<Room room={rooms?.[0] ?? null} />
+			<RoomsTab onRoomSelected={setSelectedRoom} />
+			{selectedRoom && <Room room={selectedRoom} />}
 		</div>
 	)
 }
@@ -81,6 +49,7 @@ export async function getServerSideProps(context: NextPageContext) {
 			}
 		}
 	}
+
 	// Is authenticated
 	else {
 		return {

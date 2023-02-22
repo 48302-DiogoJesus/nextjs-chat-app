@@ -4,5 +4,5 @@ export type RoomModel = {
   id: string;
   name: string;
   users: Array<UserPublicModel>;
-  createdAt: Date;
+  // createdAt: Date;
 };
