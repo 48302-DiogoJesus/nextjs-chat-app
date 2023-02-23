@@ -30,7 +30,7 @@ export default function Room(
     setMessages([]);
 
     (async () => {
-      await fetch('/api/ws')
+      await fetch('/api/chat-rooms')
       socket = io()
 
       socket.on('connect', () => {
