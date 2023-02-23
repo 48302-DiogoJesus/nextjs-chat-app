@@ -27,6 +27,8 @@
     "@types/node": "18.13.0",
     "@types/react": "18.0.28",
     "@types/react-dom": "18.0.11",
+    "@types/socket.io": "^3.0.2",
+    "@types/socket.io-client": "^3.0.0",
     "framer-motion": "^9.0.4",
     "mui": "^0.0.1",
     "next": "13.1.6",
@@ -34,10 +36,13 @@
     "pg": "^8.9.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
+    "socket.io-client": "^4.6.1",
     "typescript": "4.9.5",
+    "ws": "^8.12.1",
     "zod": "^3.20.6"
   },
   "devDependencies": {
+    "@types/ws": "^8.5.4",
     "autoprefixer": "^10.4.13",
     "postcss": "^8.4.21",
     "prisma": "^4.10.1",

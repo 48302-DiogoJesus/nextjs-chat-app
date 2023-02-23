@@ -1,20 +1,25 @@
 import * as trpcNext from "@trpc/server/adapters/next";
+import { NodeHTTPCreateContextFnOptions } from "@trpc/server/dist/adapters/node-http";
+import { IncomingMessage } from "http";
 import { NextApiRequest, NextApiResponse } from "next";
-import { appRouter } from "../../../lib/routers/_app";
+import { getSession } from "next-auth/react";
+import ws from "ws";
+import { appRouter } from "../../../server/routers/_app";
+import trpc from "@trpc/server";
 
-export type TRPCContext = {
-  req: NextApiRequest;
-  res: NextApiResponse;
-};
+export async function createContext(
+  opts:
+    | trpcNext.CreateNextContextOptions
+    | NodeHTTPCreateContextFnOptions<IncomingMessage, ws>,
+) {
+  const session = await getSession(opts);
 
-export function createContext(
-  { req, res }: { req: NextApiRequest; res: NextApiResponse },
-): TRPCContext {
   return {
-    req,
-    res,
+    session,
   };
 }
+
+export type Context = trpc.inferAsyncReturnType<typeof createContext>;
 
 export default trpcNext.createNextApiHandler({
   router: appRouter,

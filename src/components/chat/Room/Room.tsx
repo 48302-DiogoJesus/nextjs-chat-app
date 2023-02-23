@@ -2,66 +2,57 @@ import { RoomModel } from "@/model/RoomModel"
 import Image from 'next/image'
 import backgroundImage from '@/resources/bg.png'
 import Input from '@mui/joy/Input';
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MessageModel } from "@/model/MessageModel";
 import { useSession } from "next-auth/react";
 import { Button } from "@chakra-ui/react";
 import copyIcon from '@/resources/copy-icon.svg';
 import { IconButton, Tooltip } from "@mui/joy";
 import { trpc } from "@/utils/trpc";
+import { io, Socket } from "socket.io-client";
 
 type RoomProps = {
   room: RoomModel
 }
+
+let socket: Socket;
 
 export default function Room(
   { room }: RoomProps
 ) {
   const session = useSession();
   const me = session.data?.user ?? null
+  const sendMessageInputRef = useRef<HTMLInputElement | null>(null)
+  const [messages, setMessages] = useState<MessageModel[] | null>(null)
 
-  const [messages, setMessages] = useState<Array<MessageModel> | null>([
-    {
-      author: {
-        name: "Samantha",
-        email: "samantha@example.com"
-      },
-      content: "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Laborum a maxime molestiae veritatis, itaque ullam? Temporibus, recusandae aut soluta, quisquam praesentium laborum numquam vel voluptatem dolore modi, corrupti animi doloribus.",
-      createdAt: new Date()
-    },
-    {
-      author: {
-        name: "Martha",
-        email: "a48302@alunos.isel.pt"
-      },
-      content: "Hi there Samantha",
-      createdAt: new Date()
-    },
-    {
-      author: {
-        name: "Joe",
-        email: "joe@example.com"
-      },
-      content: "Hello everybody!",
-      createdAt: new Date()
-    },
-    {
-      author: {
-        name: "Joe",
-        email: "joe@example.com"
-      },
-      content: "Hello everybody!",
-      createdAt: new Date()
-    },
-    {
-      author: {
-        name: "Joe",
-        email: "joe@example.com"
-      },
-      content: "Hello everybody!",
-      createdAt: new Date()
+  useEffect(() => {
+    console.log("Connecting to new room =>", room.name);
+    setMessages([]);
+
+    (async () => {
+      await fetch('/api/ws')
+      socket = io()
+
+      socket.on('connect', () => {
+        socket.emit('join-room', { roomName: room.name })
+      })
+
+      socket.on('server-message', (message: MessageModel) => {
+        // ! TEMP fix. createdAt comes as string
+        message.createdAt = new Date(message.createdAt)
+        setMessages(prev => [...(prev ?? []), message])
+      })
+    })()
+
+    return () => {
+      socket.emit("leave-room", { roomName: room.name })
     }
-  ])
+  }, [room])
+
+  const onSendMessage = async () => {
+    const message = sendMessageInputRef.current!.value
+    socket.emit("client-message", { roomName: room.name, message: message })
+  }
 
   return (
     <div
@@ -104,7 +95,8 @@ export default function Room(
           <div
             id="chat-contents"
             className="
-              m-5 max-h-[45vh] md:max-h-[53vh]
+              m-5 max-h-[45vh] min-h-[45vh] md:max-h-[53vh] md:min-h-[53vh]
+              min-w-full
               flex flex-col items-start justify-start
               overflow-auto
             "
@@ -115,10 +107,14 @@ export default function Room(
           <div id="chat-bottom"
             className="flex items-center justify-end"
           >
-            <input placeholder="Type a message ..."
+            <input
+              ref={sendMessageInputRef}
+              placeholder="Type a message ..."
               className="input w-full"
             />
             <button
+              onClick={onSendMessage}
+
               className="
                 btn  
                 mx-4
