@@ -1,10 +1,14 @@
-import { Button, CircularProgress } from "@chakra-ui/react";
-import { useSession } from "next-auth/react";
+import { trpc } from "@/utils/trpc";
+import { githubIcon } from "@/_resources/icons";
+import { CircularProgress } from "@chakra-ui/react";
+import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 
 export default function HomePage() {
   const session = useSession()
   const router = useRouter()
+
+  const { data } = trpc.rooms.getRoomById.useQuery('fdee361c-78ee-4f5b-adb9-45e1c70f9b7d')
 
   return (
     <div
@@ -32,7 +36,7 @@ export default function HomePage() {
                   <>
                     Welcome
                     <br />
-                    {session.data?.user?.name}!
+                    {session.data?.user.name}!
                   </>
               }
             </>
@@ -47,7 +51,14 @@ export default function HomePage() {
           >
             Join Chat
           </button>
-          : null
+          : <button
+            className="btn"
+
+            onClick={() => signIn('github')}
+          >
+            <span className="mr-2">{githubIcon}</span>
+            <span>{session.status === "unauthenticated" ? 'Sign In' : 'Sign Out'}</span>
+          </button>
       }
     </div>
   );

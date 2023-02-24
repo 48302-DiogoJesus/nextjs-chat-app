@@ -11,7 +11,10 @@ datasource db {
 }
 
 model Room {
-  name      String @id
+  id        String   @id @default(uuid())
+  name      String
+  admin     User     @relation(fields: [adminId], references: [id])
+  adminId    String
   users     User[]   @relation("RoomUsers")
   createdAt DateTime @default(now())
 }
@@ -45,14 +48,15 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String    @id @default(uuid())
   name          String
-  email         String   @unique
-  emailVerified DateTime?
+  email         String    @unique
   image         String?
+  emailVerified DateTime?
   accounts      Account[]
   sessions      Session[]
-  rooms     Room[]   @relation("RoomUsers")
+  rooms         Room[]    @relation("RoomUsers")
+  Room          Room[]
 }
 
 model VerificationToken {

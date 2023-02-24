@@ -1,15 +1,13 @@
-import { MessageModel } from "@/model/MessageModel";
-import { UserPublicModel } from "@/model/UserPublicModel";
-import prismaClient from "@/server/prismaclient";
-import { User } from "@prisma/client";
+import { MessageModel } from "@/models/MessageModel";
+import { UserPublicModel } from "@/models/UserPublicModel";
+import { Room, User } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import { NextApiRequest, NextApiResponse } from "next";
 import { Session } from "next-auth";
 import { getSession } from "next-auth/react";
 import { Server, Socket } from "socket.io";
-
-type RoomName = string;
-const rooms: Map<RoomName, Socket[]> = new Map();
+import uuid from "react-uuid";
+import prismaClient from "@/server/prisma/prismaclient";
 
 const SocketHandler = async (req: NextApiRequest, res: any) => {
   if (!res.socket.server.io) {
@@ -24,10 +22,8 @@ const SocketHandler = async (req: NextApiRequest, res: any) => {
     res.socket.server.io = serverSocket;
 
     serverSocket.on("connection", (clientSocket: Socket) => {
-      console.log("Server connected to client");
-
-      clientSocket.on("join-room", ({ roomName }) => {
-        if (!userHasAccessToRoom(session.user!.email!, roomName)) {
+      clientSocket.on("join-room", ({ roomId }) => {
+        if (!userHasAccessToRoom(session.user!.email!, roomId)) {
           throw new TRPCError({
             code: "NOT_FOUND",
             message:
@@ -35,39 +31,26 @@ const SocketHandler = async (req: NextApiRequest, res: any) => {
           });
         }
 
-        clientSocket.join(roomName);
-        console.log("Joined room:", roomName);
+        clientSocket.join(roomId);
       });
 
-      // ! Concurrency problems potentially
-      // Removes client socket from room sockets list
-      clientSocket.on("leave-room", ({ roomName }) => {
-        clientSocket.leave(roomName);
-        console.log("Left room:", roomName);
+      clientSocket.on("leave-room", ({ roomId }) => {
+        clientSocket.leave(roomId);
       });
 
       clientSocket.on(
         "client-message",
-        (
-          { message, roomName },
-        ) => {
-          if (!userHasAccessToRoom(session.user!.email!, roomName)) {
+        ({ message, roomId }) => {
+          if (!userHasAccessToRoom(session.user!.email!, roomId)) {
             throw new TRPCError({
               code: "NOT_FOUND",
               message:
                 "Cannot send message. It either does not exist or you do not have access to it.",
             });
           }
-          console.log(
-            "Got message from client",
-            message,
-            "| ROOM:",
-            roomName,
-            "| CLient rooms",
-            clientSocket.rooms,
-          );
 
           const formattedMessage: MessageModel = {
+            id: uuid(),
             content: message,
             author: {
               email: session.user!.email!,
@@ -77,7 +60,10 @@ const SocketHandler = async (req: NextApiRequest, res: any) => {
             createdAt: new Date(),
           };
 
-          serverSocket.to(roomName).emit("server-message", formattedMessage);
+          serverSocket.to(roomId).emit("message", {
+            message: formattedMessage,
+            roomId: roomId,
+          });
         },
       );
     });
@@ -87,12 +73,10 @@ const SocketHandler = async (req: NextApiRequest, res: any) => {
 
 async function userHasAccessToRoom(
   userEmail: string,
-  roomName: string,
+  roomId: string,
 ): Promise<boolean> {
   const room = await prismaClient.room.findUnique({
-    where: {
-      name: roomName,
-    },
+    where: { id: roomId },
     include: { users: true },
   });
 

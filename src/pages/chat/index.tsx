@@ -1,61 +1,74 @@
 import Room from "@/components/chat/Room/Room"
-import RoomsTab from "@/components/chat/RoomsTab"
-import { RoomModel } from "@/model/RoomModel"
-import { trpc } from "@/utils/trpc"
-import { GetServerSidePropsResult } from "next"
-import { getServerSession, type Session } from "next-auth"
-import { getSession } from "next-auth/react"
-import { AppContext } from "next/app"
-import { AppContextType, NextPageContext } from "next/dist/shared/lib/utils"
-import dynamic from "next/dynamic"
-import { useRouter } from "next/router"
-import { useEffect, useState } from "react";
-import authOptions from "../api/auth/[...nextauth]"
+import RoomsTab from "@/components/chat/RoomsTab/RoomsTab"
+import { MessageModel } from "@/models/MessageModel"
+import { RoomModel } from "@/models/RoomModel"
+import ProtectSSRPage from "@/utils/protectPage"
+import { getSession, useSession } from "next-auth/react"
+import { NextPageContext } from "next/dist/shared/lib/utils"
+import { useState } from "react";
+import { io, Socket } from "socket.io-client";
 
-type ChatPageProps = {
-	session: Session
-}
+// Page props are calculated in the server using getServerSideProps but the server won't pre-render the page
+// export default dynamic(() => Promise.resolve(ChatPage), { ssr: false })
 
-// CSR only
-export default dynamic(() => Promise.resolve(ChatPage), { ssr: false })
+let socket: Socket;
 
-function ChatPage(
-	{ session }: ChatPageProps
-) {
+export default function ChatPage() {
+	type RoomId = string
+	const [roomsMessages, setRoomsMessages] = useState<Map<RoomId, MessageModel[]>>(new Map())
+
 	const [selectedRoom, setSelectedRoom] = useState<RoomModel | null>(null)
+
+	const reSubToRooms = async (rooms: RoomModel[]) => {
+		// ! FULL reconnect (Optimize later)
+		socket?.close()
+		await fetch('/api/chat-rooms')
+		socket = io()
+
+		socket.on('connect', () => {
+			for (const room of rooms) {
+				socket.emit('join-room', { roomId: room.id })
+			}
+		})
+
+		socket.on('message', ({ message, roomId }: { message: MessageModel, roomId: string }) => {
+			message.createdAt = new Date(message.createdAt)
+			const messages = roomsMessages.get(roomId)
+			if (messages) {
+				messages.push(message)
+			} else {
+				roomsMessages.set(roomId, [message])
+			}
+			// To force re-render :(
+			setRoomsMessages(new Map(roomsMessages))
+		})
+	}
 
 	return (
 		<div
 			id="chat-page"
 			className="
-				flex flex-col lg:flex-row items-center lg:items-start justify-center
-				"
+			flex flex-col lg:flex-row items-center lg:items-start justify-center
+		"
 		>
-			<RoomsTab onRoomSelected={setSelectedRoom} />
-			{selectedRoom && <Room room={selectedRoom} />}
+			<RoomsTab
+				onRoomSelected={setSelectedRoom}
+				onRoomsChanged={(rooms) => reSubToRooms(rooms)}
+			/>
+
+			{selectedRoom &&
+				<Room
+					room={selectedRoom}
+					messages={roomsMessages.get(selectedRoom.id) ?? null}
+					onSendMessage={(message: string, roomId: string) => {
+						socket.emit('client-message', { message, roomId })
+					}}
+				/>
+			}
 		</div>
 	)
 }
 
-export async function getServerSideProps(context: NextPageContext) {
-	const session = await getSession(context)
-
-	// Is not authenticated
-	if (!session) {
-		return {
-			redirect: {
-				destination: "/",
-				permanent: false
-			}
-		}
-	}
-
-	// Is authenticated
-	else {
-		return {
-			props: {
-				session
-			}
-		}
-	}
+export async function getServerSideProps(ctx: NextPageContext) {
+	return ProtectSSRPage(ctx)
 }
