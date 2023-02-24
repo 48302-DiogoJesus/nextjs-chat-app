@@ -21,8 +21,14 @@
 - [ ] Change spinner color
 - [ ] Use Inter Font and Roboto as secondary font
 
-- [ ] Improve home page UI
-- [ ] Overall refactor (src/ app/ lib/ server/ ??)
+- [ ] Limit the number of users in the members UI
+- [ ] Allow admin to delete the room 
+
+
+- [ ] Add plain email/password as auth alternative
+- [ ] Add magic link authentication
+- [ ] Add google oauth (maybe not since only defined test users can use it)  
+- [ ] Understand conventions around project structure (src/ app/ lib/ server/ ??)
 
 ### Notes
 
