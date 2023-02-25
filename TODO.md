@@ -17,11 +17,18 @@
 - [x] Used DaisyUI for basic elements and information/error modals (not very friendly to work with)
 
 - [x] Notification popup for when messages from rooms other than the selected one have been received
-- [ ] Replace CircularProgressIndicator components with DaisyUI spinners
+- [x] Replace CircularProgressIndicator components with DaisyUI spinners
 
-- [ ] Typesafe env vars access
+- [x] Simplify data flow in Chat Page
+- [x] Optimize socket connections in Chat Page
+      one socket created initially. onConnect join all myRooms
+      when a room is joined/created/deleted sub/unsub from that socket room
+
 - [ ] Allow admin to delete the room
+        then emit "room-deleted" event with the roomId to that room
+        clients then should remove their ws subscription (leave room) 
 - [ ] Try Framer Motion for page load animations
+- [ ] Typesafe env vars access
 
 - [ ] Put Inter Font as primary font and Roboto as secondary
 - [ ] Allow admins to change room name

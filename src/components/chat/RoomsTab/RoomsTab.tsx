@@ -1,30 +1,33 @@
 import { RoomModel } from "@/models/RoomModel"
-import { CircularProgress } from '@chakra-ui/react';
 import { trpc } from "@/utils/trpc"
-import { useState } from "react";
 import RoomCard from "./RoomCard"
-import isUUID from "@/utils/isUUID"
 import CreateJoinRoom from "./CreateJoinRoom"
 import { launchModal } from "@/components/modals/Modal"
-import { unwrapErrorMessage } from "@/utils/mySafeParse";
-import unwrapTrpcError from "@/utils/trpcErrorHelpers";
+import Loader from "@/components/Loader";
+import { UUID } from "@/models/commonSchemas";
 
 export type RoomsTabProps = {
+  rooms: RoomModel[] | null
+  selectedRoom: RoomModel | null
+
   onRoomSelected: (room: RoomModel) => void
-  onRoomsChanged: (rooms: RoomModel[]) => void
+  onRoomAdded: (room: RoomModel) => void
+  // onRoomRemoved: (oldRoom: RoomModel) => void // When removing rooms feature is added
 }
 
 export default function RoomsTab(
-  { onRoomSelected, onRoomsChanged }: RoomsTabProps
+  { rooms, selectedRoom, onRoomSelected, onRoomAdded }: RoomsTabProps
 ) {
 
-  const [selectedRoom, selectRoom] = useState<RoomModel | null>(null)
-
-  // * TRPC interactions 
+  // * TRPC * \\
   const trpcCtx = trpc.useContext()
 
-  const createRoom = trpc.rooms.createRoom.useMutation({
-    onSuccess: () => trpcCtx.rooms.getMyRooms.invalidate(),
+  const { mutate: createRoom } = trpc.rooms.createRoom.useMutation({
+    onSuccess: (room) => {
+      trpcCtx.rooms.getMyRooms.invalidate()
+      onRoomSelected(room)
+      onRoomAdded(room)
+    },
     onError: (err) => {
       launchModal({
         title: "Error creating room",
@@ -34,39 +37,31 @@ export default function RoomsTab(
     }
   })
 
-  const joinRoom = trpc.rooms.joinRoom.useMutation({
-    onSuccess: () => trpcCtx.rooms.getMyRooms.invalidate(),
+  const { mutate: joinRoom } = trpc.rooms.joinRoom.useMutation({
+    onSuccess: (room) => {
+      trpcCtx.rooms.getMyRooms.invalidate()
+      onRoomSelected(room)
+      onRoomAdded(room)
+    },
     onError: ({ message }) => {
       launchModal({ title: "Error joining room", message, closeAutomaticAfterSeconds: 10 })
     }
   })
 
-  const { data: myRooms } = trpc.rooms.getMyRooms.useQuery(undefined, {
-    onSuccess: (newRooms) => {
-      onRoomsChanged(newRooms)
-      if (newRooms.length > 0) {
-        const firstRoom = newRooms[0]
-        selectRoom(firstRoom)
-        onRoomSelected(firstRoom)
-      }
-    },
-    onError: ({ message }) => {
-      launchModal({ title: "Error getting your list of rooms", message })
-    }
-  })
+  // * Event Handlers * \\
 
   const onCreateRoom = (roomName: string) => {
-    createRoom.mutate({ roomName })
+    createRoom({ roomName })
   }
 
   const onJoinRoom = (roomId: string) => {
-    if (!isUUID(roomId)) {
+    if (UUID.safeParse(roomId).success) {
       launchModal({
-        title: "Error joining room",
-        message: "Invalid room id.\n Valid room id example: 2f9d7416-d3d7-4802-be54-2aa57c9b7f58"
+        title: "Invalid Room Id",
+        message: "Valid room id example: 2f9d7416-d3d7-4802-be54-2aa57c9b7f58"
       })
     } else {
-      joinRoom.mutate({ roomId })
+      joinRoom({ roomId })
     }
   }
 
@@ -79,8 +74,8 @@ export default function RoomsTab(
       "
     >
       {
-        !myRooms
-          ? <CircularProgress isIndeterminate color='green.300' />
+        !rooms
+          ? <Loader message="Loading Your Rooms..." />
           :
           <>
             <CreateJoinRoom
@@ -97,15 +92,13 @@ export default function RoomsTab(
               max-h-[60vh] overflow-x-visible overflow-y-scroll
             ">
               <>
-                {myRooms.map(room =>
-                  <RoomCard key={room.id}
+                {rooms.map(room =>
+                  <RoomCard
+                    key={room.id}
                     room={room}
-                    isSelected={room === selectedRoom}
+                    isSelected={room.id === selectedRoom?.id}
 
-                    onClicked={() => {
-                      onRoomSelected(room)
-                      selectRoom(room)
-                    }}
+                    onClicked={() => onRoomSelected(room)}
                   />
                 )}
               </>

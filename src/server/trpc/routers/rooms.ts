@@ -1,6 +1,7 @@
 import { UUID } from "@/models/commonSchemas";
-import { roomNameSchema } from "@/models/RoomModel";
+import { RoomModel, roomNameSchema, RoomSchema } from "@/models/RoomModel";
 import { RoomsStorage } from "@/server/prisma/RoomStorage";
+import { myParse, mySafeParse } from "@/utils/mySafeParse";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { requireAuthProcedure, router } from "../trpc";
@@ -14,8 +15,9 @@ import { requireAuthProcedure, router } from "../trpc";
 
 const roomsRouter = router({
   getMyRooms: requireAuthProcedure
-    .query(({ ctx: { session } }) =>
-      RoomsStorage.getMyRooms(session.user.email)
+    .query(
+      ({ ctx: { session } }): Promise<RoomModel[]> =>
+        RoomsStorage.getMyRooms(session.user.email),
     ),
 
   getRoom: requireAuthProcedure
@@ -24,21 +26,23 @@ const roomsRouter = router({
         roomId: UUID,
       }),
     )
-    .query(async ({ ctx: { session }, input: { roomId } }) => {
-      const room = await RoomsStorage.getRoomById(roomId);
+    .query(
+      async ({ ctx: { session }, input: { roomId } }): Promise<RoomModel> => {
+        const room = await RoomsStorage.getRoomById(roomId);
 
-      if (
-        !room || !room.users.find((user) => user.email === session.user.email)
-      ) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message:
-            "Cannot get room information. It either does not exist or you do not have access to it.",
-        });
-      }
+        if (
+          !room || !room.users.find((user) => user.email === session.user.email)
+        ) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message:
+              "Cannot get room information. It either does not exist or you do not have access to it.",
+          });
+        }
 
-      return { room };
-    }),
+        return room;
+      },
+    ),
 
   createRoom: requireAuthProcedure
     .input(
@@ -46,12 +50,13 @@ const roomsRouter = router({
         roomName: roomNameSchema,
       }),
     )
-    .mutation(({ ctx: { session }, input: { roomName } }) => {
-      return RoomsStorage.createRoomAndSetAdmin(
-        roomName,
-        session.user.email,
-      );
-    }),
+    .mutation(
+      ({ ctx: { session }, input: { roomName } }): Promise<RoomModel> =>
+        RoomsStorage.createRoomAndSetAdmin(
+          roomName,
+          session.user.email,
+        ),
+    ),
 
   joinRoom: requireAuthProcedure
     .input(
@@ -59,26 +64,30 @@ const roomsRouter = router({
         roomId: UUID,
       }),
     )
-    .mutation(async ({ ctx: { session }, input: { roomId } }) => {
-      const room = await RoomsStorage.getRoomById(roomId);
-      const userEmail = session.user.email;
+    .mutation(
+      async ({ ctx: { session }, input: { roomId } }): Promise<RoomModel> => {
+        const room = await RoomsStorage.getRoomById(roomId);
+        const userEmail = session.user.email;
 
-      if (!room) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Room does not exist",
-        });
-      }
+        if (!room) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Room does not exist",
+          });
+        }
 
-      if (room.users.find((user) => user.email === userEmail)) {
-        throw new TRPCError({
-          code: "CONFLICT",
-          message: "You are already in that room!",
-        });
-      }
+        if (room.users.find((user) => user.email === userEmail)) {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: "You are already in that room!",
+          });
+        }
 
-      await RoomsStorage.addUserToRoom(roomId, userEmail);
-    }),
+        await RoomsStorage.addUserToRoom(roomId, userEmail);
+
+        return room;
+      },
+    ),
 });
 
 export default roomsRouter;

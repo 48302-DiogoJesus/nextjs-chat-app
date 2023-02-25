@@ -40,7 +40,10 @@ export const RoomsStorage = {
       },
     }).then((room) => myParse(RoomSchema, room)),
 
-  createRoomAndSetAdmin: (roomName: string, adminEmail: string) =>
+  createRoomAndSetAdmin: (
+    roomName: string,
+    adminEmail: string,
+  ): Promise<RoomModel> =>
     prismaClient.room.create({
       data: {
         name: roomName,
@@ -55,7 +58,11 @@ export const RoomsStorage = {
           },
         },
       },
-    }),
+      include: {
+        admin: userPublicModelSelection,
+        users: userPublicModelSelection,
+      },
+    }).then((room) => myParse(RoomSchema, room)),
 
   addUserToRoom: (roomId: string, userEmail: string) =>
     prismaClient.room.update({
@@ -65,5 +72,9 @@ export const RoomsStorage = {
           connect: { email: userEmail },
         },
       },
-    }),
+      include: {
+        admin: userPublicModelSelection,
+        users: userPublicModelSelection,
+      },
+    }).then((room) => myParse(RoomSchema, room)),
 };

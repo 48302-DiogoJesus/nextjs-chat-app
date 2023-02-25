@@ -1,7 +1,7 @@
 import { githubIcon } from "@/_resources/icons";
-import { CircularProgress } from "@chakra-ui/react";
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
+import Loader from "../Loader";
 
 export default function NavBar() {
 	const session = useSession()
@@ -32,7 +32,7 @@ export default function NavBar() {
 			{
 				session.status === "loading"
 					?
-					<CircularProgress isIndeterminate color='green.300' />
+					<Loader />
 					: null
 			}
 			{

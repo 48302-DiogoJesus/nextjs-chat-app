@@ -1,5 +1,5 @@
+import Loader from "@/components/Loader";
 import { githubIcon } from "@/_resources/icons";
-import { CircularProgress } from "@chakra-ui/react";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
 
@@ -22,7 +22,7 @@ export default function HomePage() {
         {
           session.status === "loading"
             ?
-            <CircularProgress isIndeterminate color='green.300' />
+            <Loader />
             :
             <>
               {
