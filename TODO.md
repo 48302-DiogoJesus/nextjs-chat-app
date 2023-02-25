@@ -14,21 +14,23 @@
   solution: used superjson on trpc
 - [x] Create constraints around room names and messages (zod?)
 - [x] Secure data from db using zod (will cut out unexpected fields (not present in the schema))
+- [x] Used DaisyUI for basic elements and information/error modals (not very friendly to work with)
 
-- [ ] Try out DaisyUI
-- [ ] Try Framer Motion for page load animations
 - [ ] Notification popup for when messages from rooms other than the selected one have been received
-- [ ] Create error displayer component wrapper
-- [ ] Change spinner color
-- [ ] Use Inter Font and Roboto as secondary font
 - [ ] Typesafe env vars access
-
-- [ ] Limit the number of users in the members UI
 - [ ] Allow admin to delete the room
+- [ ] Try Framer Motion for page load animations
+
+- [ ] Replace CircularProgressIndicator components with DaisyUI spinners
+- [ ] Put Inter Font as primary font and Roboto as secondary
+- [ ] Allow admins to change room name
+
+- [ ] Limit the number of users in the room members UI
 
 - [ ] Add plain email/password as auth alternative
 - [ ] Add magic link authentication
 - [ ] Add google oauth (maybe not since only defined test users can use it)  
+
 - [ ] Understand conventions around project structure (src/ app/ lib/ server/ ??)
 
 ### Notes
