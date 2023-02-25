@@ -12,18 +12,19 @@
   solution: override Session type for next-auth context
 - [x] Remove ugly: room as unknown as RoomModel (from trpc query result)
   solution: used superjson on trpc
+- [x] Create constraints around room names and messages (zod?)
+- [x] Secure data from db using zod (will cut out unexpected fields (not present in the schema))
 
-- [ ] Create constraints around room names and messages (zod?)
-- [ ] Typesafe env vars access
-
+- [ ] Try out DaisyUI
+- [ ] Try Framer Motion for page load animations
 - [ ] Notification popup for when messages from rooms other than the selected one have been received
 - [ ] Create error displayer component wrapper
 - [ ] Change spinner color
 - [ ] Use Inter Font and Roboto as secondary font
+- [ ] Typesafe env vars access
 
 - [ ] Limit the number of users in the members UI
-- [ ] Allow admin to delete the room 
-
+- [ ] Allow admin to delete the room
 
 - [ ] Add plain email/password as auth alternative
 - [ ] Add magic link authentication

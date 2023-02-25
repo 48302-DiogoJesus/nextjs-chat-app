@@ -1,3 +1,4 @@
+import { launchModal } from "@/components/modals/Modal"
 import { RoomModel } from "@/models/RoomModel"
 import { copyIcon } from "@/_resources/icons"
 
@@ -18,7 +19,14 @@ export default function TopRoomData(
           className="
             hover:cursor-pointer hover:scale-105 w-6
           "
-          onClick={() => navigator.clipboard.writeText(room.id)}
+          onClick={() => {
+            navigator.clipboard.writeText(room.id)
+            launchModal({
+              title: "Copied to clipboard",
+              showButtons: false,
+              closeAutomaticAfterSeconds: 3
+            })
+          }}
         >{copyIcon}</span>
         <span className="text-sm">Click to copy room id and invite others</span>
       </div>

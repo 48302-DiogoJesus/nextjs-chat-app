@@ -1,10 +1,16 @@
-import { RoomModel } from "@/models/RoomModel";
+import { RoomModel, roomNameSchema, RoomSchema } from "@/models/RoomModel";
+import { myParse } from "@/utils/mySafeParse";
 import prismaClient from "./prismaclient";
 import { userPublicModelSelection } from "./selections/UserPublicModelSelection";
 
 /**
- * * To avoid leaking "private" objects properties only the public fields included in the
- * * DB selection using selections inside ./selections
+ * !! IMPORTANT !!
+ * On queries, for security and optimization reasons we should
+ *  explicitly specify return type (Ex: Promise<RoomModel[]>)
+ *  this still does not prevent db from giving more fields than RoomModel has.
+ *  That is solved using ZOD schemas to parse the objects
+ *  ZOD only grabs the properties specified in the schema but it also performs more
+ *  detailed field validation (not very important for Output Models, but for InputModels).
  */
 
 export const RoomsStorage = {
@@ -21,16 +27,7 @@ export const RoomsStorage = {
         admin: userPublicModelSelection,
         users: userPublicModelSelection,
       },
-    })
-      .then((rooms) =>
-        rooms.map((r): RoomModel => ({
-          id: r.id,
-          admin: r.admin,
-          name: r.name,
-          users: r.users,
-          createdAt: r.createdAt,
-        }))
-      ),
+    }).then((rooms) => rooms.map((room) => myParse(RoomSchema, room))),
 
   getRoomById: (roomId: string): Promise<RoomModel | null> =>
     prismaClient.room.findUnique({
@@ -41,7 +38,7 @@ export const RoomsStorage = {
         users: userPublicModelSelection,
         admin: userPublicModelSelection,
       },
-    }),
+    }).then((room) => myParse(RoomSchema, room)),
 
   createRoomAndSetAdmin: (roomName: string, adminEmail: string) =>
     prismaClient.room.create({

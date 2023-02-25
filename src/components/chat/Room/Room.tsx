@@ -1,6 +1,4 @@
 import { RoomModel } from "@/models/RoomModel"
-import Image from 'next/image'
-import backgroundImage from '@/_resources/bg.png'
 import { MessageModel } from "@/models/MessageModel";
 import { useSession } from "next-auth/react";
 import Message from "./Message";
@@ -21,53 +19,41 @@ export default function Room(
 
   return (
     <div
+      id="chat-room-container"
       className="
-      overflow-hidden
-      relative
+      bg-gray-800
+        flex flex-col justify-between
+        p-7  m-5 rounded-lg
+        h-[85vh] lg:max-h-[1000px]
+        min-w-[90vw] lg:min-w-[600px] lg:w-[40vw] lg:max-w-[1000px]
+
+        border-2 border-gray-600
+        opacity-80
       "
     >
-      <div
-        id="background-image"
-        className="blur-sm opacity-70"
-      >
-        <Image
-          src={backgroundImage}
-          alt='Mountains Background'
-          style={{ width: "100vh" }}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent"></div>
-        <div className="absolute inset-0 bg-gradient-to-b from-gray-900 to-transparent"></div>
-      </div>
+      <TopRoomData room={room} />
 
       <div
-        id="chat-container"
-        className="absolute top-0 left-0 p-7 w-full"
+        id="chat-contents"
+        className="
+          min-w-full
+          h-full
+          flex flex-col items-start justify-start
+          overflow-auto
+        "
       >
-        <TopRoomData room={room} />
-
-        <div
-          id="chat-contents"
-          className="
-              m-5 max-h-[45vh] min-h-[45vh] md:max-h-[53vh] md:min-h-[53vh]
-              min-w-full
-              flex flex-col items-start justify-start
-              overflow-auto
-            "
-        >
-          {messages?.map(msg =>
-            <Message
-              key={msg.id}
-              message={msg}
-              isMine={msg.author.email === me?.email}
-            />
-          )}
-        </div>
-
-        <BottomInput
-          onSendMessage={(message) => sendMessage(message, room.id)}
-        />
+        {messages?.map(msg =>
+          <Message
+            key={msg.id}
+            message={msg}
+            isMine={msg.author.email === me?.email}
+          />
+        )}
       </div>
+
+      <BottomInput
+        onSendMessage={(message) => sendMessage(message, room.id)}
+      />
     </div>
   )
 }
-

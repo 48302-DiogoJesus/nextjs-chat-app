@@ -33,8 +33,8 @@ export default function BottomInput(
         className="
           btn  
           mx-4
-          bg-red  
-          hover:scale-105 hover:bg-red hover:opacity-90
+          bg-red
+          hover:bg-red hover:opacity-90
         "
       >
         Send

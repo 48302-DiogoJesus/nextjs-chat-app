@@ -1,11 +1,13 @@
 import { RoomModel } from "@/models/RoomModel"
-import Image from "next/image"
-import { CircularProgress, Input } from '@chakra-ui/react'
+import { CircularProgress } from '@chakra-ui/react';
 import { trpc } from "@/utils/trpc"
-import { useRef, useState } from "react"
+import { useState } from "react";
 import RoomCard from "./RoomCard"
 import isUUID from "@/utils/isUUID"
 import CreateJoinRoom from "./CreateJoinRoom"
+import { launchModal } from "@/components/modals/Modal"
+import { unwrapErrorMessage } from "@/utils/mySafeParse";
+import unwrapTrpcError from "@/utils/trpcErrorHelpers";
 
 export type RoomsTabProps = {
   onRoomSelected: (room: RoomModel) => void
@@ -22,11 +24,21 @@ export default function RoomsTab(
   const trpcCtx = trpc.useContext()
 
   const createRoom = trpc.rooms.createRoom.useMutation({
-    onSuccess: () => trpcCtx.rooms.getMyRooms.invalidate()
+    onSuccess: () => trpcCtx.rooms.getMyRooms.invalidate(),
+    onError: (err) => {
+      launchModal({
+        title: "Error creating room",
+        message: err.message,
+        closeAutomaticAfterSeconds: 10
+      })
+    }
   })
 
   const joinRoom = trpc.rooms.joinRoom.useMutation({
-    onSuccess: () => trpcCtx.rooms.getMyRooms.invalidate()
+    onSuccess: () => trpcCtx.rooms.getMyRooms.invalidate(),
+    onError: ({ message }) => {
+      launchModal({ title: "Error joining room", message, closeAutomaticAfterSeconds: 10 })
+    }
   })
 
   const { data: myRooms } = trpc.rooms.getMyRooms.useQuery(undefined, {
@@ -37,6 +49,9 @@ export default function RoomsTab(
         selectRoom(firstRoom)
         onRoomSelected(firstRoom)
       }
+    },
+    onError: ({ message }) => {
+      launchModal({ title: "Error getting your list of rooms", message })
     }
   })
 
@@ -46,7 +61,10 @@ export default function RoomsTab(
 
   const onJoinRoom = (roomId: string) => {
     if (!isUUID(roomId)) {
-      alert("You must enter a valid room ID, not a name!")
+      launchModal({
+        title: "Error joining room",
+        message: "Invalid room id.\n Valid room id example: 2f9d7416-d3d7-4802-be54-2aa57c9b7f58"
+      })
     } else {
       joinRoom.mutate({ roomId })
     }

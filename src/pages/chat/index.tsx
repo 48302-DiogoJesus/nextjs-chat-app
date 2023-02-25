@@ -1,9 +1,9 @@
 import Room from "@/components/chat/Room/Room"
 import RoomsTab from "@/components/chat/RoomsTab/RoomsTab"
+import { launchModal } from "@/components/modals/Modal"
 import { MessageModel } from "@/models/MessageModel"
 import { RoomModel } from "@/models/RoomModel"
 import ProtectSSRPage from "@/utils/protectPage"
-import { getSession, useSession } from "next-auth/react"
 import { NextPageContext } from "next/dist/shared/lib/utils"
 import { useState } from "react";
 import { io, Socket } from "socket.io-client";
@@ -22,7 +22,7 @@ export default function ChatPage() {
 	const reSubToRooms = async (rooms: RoomModel[]) => {
 		// ! FULL reconnect (Optimize later)
 		socket?.close()
-		await fetch('/api/chat-rooms')
+		await fetch('/api/ws/chat')
 		socket = io()
 
 		socket.on('connect', () => {
@@ -41,6 +41,10 @@ export default function ChatPage() {
 			}
 			// To force re-render :(
 			setRoomsMessages(new Map(roomsMessages))
+		})
+
+		socket.on('chat-error', ({ message }) => {
+			launchModal({ title: "Chat Error", message, closeAutomaticAfterSeconds: 10 })
 		})
 	}
 

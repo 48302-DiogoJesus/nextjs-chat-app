@@ -1,4 +1,5 @@
-import prismaClient from "@/server/prisma/prismaclient";
+import { UUID } from "@/models/commonSchemas";
+import { roomNameSchema } from "@/models/RoomModel";
 import { RoomsStorage } from "@/server/prisma/RoomStorage";
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
@@ -17,9 +18,13 @@ const roomsRouter = router({
       RoomsStorage.getMyRooms(session.user.email)
     ),
 
-  getRoomById: requireAuthProcedure
-    .input(z.string())
-    .query(async ({ ctx: { session }, input: roomId }) => {
+  getRoom: requireAuthProcedure
+    .input(
+      z.object({
+        roomId: UUID,
+      }),
+    )
+    .query(async ({ ctx: { session }, input: { roomId } }) => {
       const room = await RoomsStorage.getRoomById(roomId);
 
       if (
@@ -36,17 +41,22 @@ const roomsRouter = router({
     }),
 
   createRoom: requireAuthProcedure
-    .input(z.object({
-      roomName: z.string(),
-    }))
-    .mutation(({ ctx: { session }, input: { roomName } }) =>
-      RoomsStorage.createRoomAndSetAdmin(roomName, session.user.email)
-    ),
+    .input(
+      z.object({
+        roomName: roomNameSchema,
+      }),
+    )
+    .mutation(({ ctx: { session }, input: { roomName } }) => {
+      return RoomsStorage.createRoomAndSetAdmin(
+        roomName,
+        session.user.email,
+      );
+    }),
 
   joinRoom: requireAuthProcedure
     .input(
       z.object({
-        roomId: z.string(),
+        roomId: UUID,
       }),
     )
     .mutation(async ({ ctx: { session }, input: { roomId } }) => {

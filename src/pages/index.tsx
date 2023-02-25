@@ -8,8 +8,6 @@ export default function HomePage() {
   const session = useSession()
   const router = useRouter()
 
-  const { data } = trpc.rooms.getRoomById.useQuery('fdee361c-78ee-4f5b-adb9-45e1c70f9b7d')
-
   return (
     <div
       id="home-page"
@@ -36,7 +34,7 @@ export default function HomePage() {
                   <>
                     Welcome
                     <br />
-                    {session.data?.user.name}!
+                    {session.data!.user.name}!
                   </>
               }
             </>
@@ -46,7 +44,7 @@ export default function HomePage() {
         session.status === "authenticated"
           ?
           <button
-            className="btn"
+            className="btn text-white bg-green-600 hover:bg-green-700"
             onClick={() => router.push("/chat")}
           >
             Join Chat

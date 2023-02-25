@@ -7,6 +7,7 @@ import * as trpcNext from "@trpc/server/adapters/next";
 import trpc from "@trpc/server";
 import { Session } from "next-auth";
 import superjson from "superjson";
+import { ZodError } from "zod";
 
 export async function createContext(
   opts:
@@ -23,6 +24,19 @@ type Context = trpc.inferAsyncReturnType<typeof createContext>;
 
 const t = initTRPC.context<Context>().create({
   transformer: superjson,
+  errorFormatter: ({ shape, error }) => {
+    const isZodError = error.code === "BAD_REQUEST" &&
+      error.cause instanceof ZodError;
+
+    const firstZodErrorMessage: string | null = isZodError
+      ? Object.entries(error.cause.flatten().fieldErrors)[0][1]?.[0] ?? null
+      : null;
+
+    return {
+      ...shape,
+      message: firstZodErrorMessage ? firstZodErrorMessage : error.message,
+    };
+  },
 });
 
 export const requireAuthMW = t.middleware(async ({ ctx, next }) => {

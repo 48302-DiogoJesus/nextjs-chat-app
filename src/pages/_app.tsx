@@ -7,13 +7,18 @@ import '@fontsource/roboto/700.css';
 import NavBar from '@/components/Layout/NavBar';
 import { SessionProvider } from "next-auth/react"
 import { trpc } from '../utils/trpc'
+import { SimpleModal } from '@/components/modals/Modal';
 
 function App({ Component, pageProps }: AppProps) {
     return (
-        <SessionProvider session={pageProps.session}>
-            <NavBar />
-            <Component {...pageProps} />
-        </SessionProvider>
+        <>
+            <SessionProvider session={pageProps.session}>
+                <NavBar />
+                <Component  {...pageProps} />
+            </SessionProvider>
+
+            <SimpleModal />
+        </>
     )
 }
 

@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "dev:dbmig": "npx prisma migrate dev",
-    "dev:dbschema": "npx prisma migrate reset && npx prisma migrate dev && npx prisma generate"
+    "dev:dbreset": "npx prisma migrate reset && npx prisma migrate dev && npx prisma generate",
+    "dev:dbsync": "npx prisma db push"
   },
   "dependencies": {
     "@chakra-ui/react": "^2.5.1",
@@ -29,6 +30,7 @@
     "@types/react-dom": "18.0.11",
     "@types/socket.io": "^3.0.2",
     "@types/socket.io-client": "^3.0.0",
+    "daisyui": "^2.51.1",
     "framer-motion": "^9.0.4",
     "mui": "^0.0.1",
     "next": "13.1.6",
@@ -39,6 +41,8 @@
     "react-uuid": "^2.0.0",
     "socket.io-client": "^4.6.1",
     "superjson": "^1.12.2",
+    "tozod": "^3.0.0",
+    "ts-typed-events": "^3.0.0",
     "typescript": "4.9.5",
     "ws": "^8.12.1",
     "zod": "^3.20.6"

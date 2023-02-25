@@ -1,3 +1,4 @@
+import { launchModal } from "@/components/modals/Modal"
 import { useRef } from "react"
 
 export type CreateJoinRoomProps = {
@@ -36,7 +37,7 @@ export default function CreateJoinRoom(
           }}
         />
         <button
-          className="btn bg-blue-800 hover:bg-blue-700 w-full"
+          className="btn bg-blue-800 hover:bg-blue-700 w-24"
           onClick={() => {
             onJoinRoom(roomIdElem.current!.value)
             clearRoomId()
@@ -59,7 +60,7 @@ export default function CreateJoinRoom(
           }}
         />
         <button
-          className="btn bg-green-900 hover:bg-green-800 w-full"
+          className="btn bg-green-900 hover:bg-green-800 w-24"
           onClick={() => {
             onCreateRoom(roomNameElem.current!.value)
             clearRoomName()
@@ -68,6 +69,6 @@ export default function CreateJoinRoom(
           Create
         </button>
       </div>
-    </div>
+    </div >
   )
 }

@@ -1,13 +1,22 @@
-import { MessageModel } from "@/models/MessageModel";
-import { UserPublicModel } from "@/models/UserPublicModel";
-import { Room, User } from "@prisma/client";
+import {
+  messageContentSchema,
+  MessageModel,
+  MessageSchema,
+} from "@/models/MessageModel";
 import { TRPCError } from "@trpc/server";
-import { NextApiRequest, NextApiResponse } from "next";
-import { Session } from "next-auth";
+import { NextApiRequest } from "next";
 import { getSession } from "next-auth/react";
 import { Server, Socket } from "socket.io";
 import uuid from "react-uuid";
-import prismaClient from "@/server/prisma/prismaclient";
+import { RoomsStorage } from "@/server/prisma/RoomStorage";
+import {
+  SafeParseError,
+  SafeParseReturnType,
+  SafeParseSuccess,
+  ZodError,
+  ZodType,
+} from "zod";
+import { mySafeParse } from "@/utils/mySafeParse";
 
 const SocketHandler = async (req: NextApiRequest, res: any) => {
   if (!res.socket.server.io) {
@@ -24,11 +33,11 @@ const SocketHandler = async (req: NextApiRequest, res: any) => {
     serverSocket.on("connection", (clientSocket: Socket) => {
       clientSocket.on("join-room", ({ roomId }) => {
         if (!userHasAccessToRoom(session.user!.email!, roomId)) {
-          throw new TRPCError({
-            code: "NOT_FOUND",
-            message:
-              "Cannot join room. It either does not exist or you do not have access to it.",
-          });
+          emitError(
+            clientSocket,
+            "Cannot join room. It either does not exist or you do not have access to it.",
+          );
+          return;
         }
 
         clientSocket.join(roomId);
@@ -41,12 +50,18 @@ const SocketHandler = async (req: NextApiRequest, res: any) => {
       clientSocket.on(
         "client-message",
         ({ message, roomId }) => {
+          const parseRes = mySafeParse(messageContentSchema, message);
+          if (!parseRes.success) {
+            emitError(clientSocket, parseRes.errorMessage);
+            return;
+          }
+
           if (!userHasAccessToRoom(session.user!.email!, roomId)) {
-            throw new TRPCError({
-              code: "NOT_FOUND",
-              message:
-                "Cannot send message. It either does not exist or you do not have access to it.",
-            });
+            emitError(
+              clientSocket,
+              "Cannot send message. It either does not exist or you do not have access to it.",
+            );
+            return;
           }
 
           const formattedMessage: MessageModel = {
@@ -71,14 +86,17 @@ const SocketHandler = async (req: NextApiRequest, res: any) => {
   res.end();
 };
 
+function emitError(clientSocket: Socket, errorMessage: string) {
+  clientSocket.emit("chat-error", {
+    message: errorMessage,
+  });
+}
+
 async function userHasAccessToRoom(
   userEmail: string,
   roomId: string,
 ): Promise<boolean> {
-  const room = await prismaClient.room.findUnique({
-    where: { id: roomId },
-    include: { users: true },
-  });
+  const room = await RoomsStorage.getRoomById(roomId);
 
   return (
     !room ||
