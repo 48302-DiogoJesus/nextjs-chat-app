@@ -8,13 +8,16 @@ import NavBar from '@/components/Layout/NavBar';
 import { SessionProvider } from "next-auth/react"
 import { trpc } from '../utils/trpc'
 import { SimpleModal } from '@/components/modals/Modal';
+import { NotificationsProvider } from '@/components/notifications/NotificationsComponent';
 
 function App({ Component, pageProps }: AppProps) {
     return (
         <>
             <SessionProvider session={pageProps.session}>
-                <NavBar />
-                <Component  {...pageProps} />
+                <NotificationsProvider>
+                    <NavBar />
+                    <Component  {...pageProps} />
+                </NotificationsProvider>
             </SessionProvider>
 
             <SimpleModal />

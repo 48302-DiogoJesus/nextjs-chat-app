@@ -1,4 +1,3 @@
-import { trpc } from "@/utils/trpc";
 import { githubIcon } from "@/_resources/icons";
 import { CircularProgress } from "@chakra-ui/react";
 import { signIn, useSession } from "next-auth/react";

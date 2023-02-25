@@ -16,12 +16,13 @@
 - [x] Secure data from db using zod (will cut out unexpected fields (not present in the schema))
 - [x] Used DaisyUI for basic elements and information/error modals (not very friendly to work with)
 
-- [ ] Notification popup for when messages from rooms other than the selected one have been received
+- [x] Notification popup for when messages from rooms other than the selected one have been received
+- [ ] Replace CircularProgressIndicator components with DaisyUI spinners
+
 - [ ] Typesafe env vars access
 - [ ] Allow admin to delete the room
 - [ ] Try Framer Motion for page load animations
 
-- [ ] Replace CircularProgressIndicator components with DaisyUI spinners
 - [ ] Put Inter Font as primary font and Roboto as secondary
 - [ ] Allow admins to change room name
 
@@ -37,3 +38,11 @@
 
 - Rooms can exist "forever" (in database) with users associated to them.
   Conversations are not stored persistently (only exist while the server instance is running)
+
+
+### React
+
+- IN `const [value, setValue] = useState()` value is a value
+- IN `const ref = useRef()` ref.current is a reference
+- If we have a function that uses an external value, if we need it to always access the most recent 
+value use useRef, otherwise useState 

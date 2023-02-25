@@ -1,21 +1,9 @@
-import {
-  messageContentSchema,
-  MessageModel,
-  MessageSchema,
-} from "@/models/MessageModel";
-import { TRPCError } from "@trpc/server";
+import { messageContentSchema, MessageModel } from "@/models/MessageModel";
 import { NextApiRequest } from "next";
 import { getSession } from "next-auth/react";
 import { Server, Socket } from "socket.io";
 import uuid from "react-uuid";
 import { RoomsStorage } from "@/server/prisma/RoomStorage";
-import {
-  SafeParseError,
-  SafeParseReturnType,
-  SafeParseSuccess,
-  ZodError,
-  ZodType,
-} from "zod";
 import { mySafeParse } from "@/utils/mySafeParse";
 
 const SocketHandler = async (req: NextApiRequest, res: any) => {
@@ -31,8 +19,11 @@ const SocketHandler = async (req: NextApiRequest, res: any) => {
     res.socket.server.io = serverSocket;
 
     serverSocket.on("connection", (clientSocket: Socket) => {
-      clientSocket.on("join-room", ({ roomId }) => {
-        if (!userHasAccessToRoom(session.user!.email!, roomId)) {
+      clientSocket.on("join-room", async ({ roomId }) => {
+        const room = await RoomsStorage.getRoomById(roomId);
+        const userEmail = session.user.email;
+
+        if (!room || !room.users.find((user) => user.email === userEmail)) {
           emitError(
             clientSocket,
             "Cannot join room. It either does not exist or you do not have access to it.",
@@ -49,14 +40,16 @@ const SocketHandler = async (req: NextApiRequest, res: any) => {
 
       clientSocket.on(
         "client-message",
-        ({ message, roomId }) => {
+        async ({ message, roomId }) => {
           const parseRes = mySafeParse(messageContentSchema, message);
           if (!parseRes.success) {
             emitError(clientSocket, parseRes.errorMessage);
             return;
           }
+          const room = await RoomsStorage.getRoomById(roomId);
+          const userEmail = session.user.email;
 
-          if (!userHasAccessToRoom(session.user!.email!, roomId)) {
+          if (!room || !room.users.find((user) => user.email === userEmail)) {
             emitError(
               clientSocket,
               "Cannot send message. It either does not exist or you do not have access to it.",
@@ -68,9 +61,9 @@ const SocketHandler = async (req: NextApiRequest, res: any) => {
             id: uuid(),
             content: message,
             author: {
-              email: session.user!.email!,
-              name: session.user!.name!,
-              image: session.user!.image ?? null,
+              email: session.user.email,
+              name: session.user.name,
+              image: session.user.image,
             },
             createdAt: new Date(),
           };
@@ -78,6 +71,7 @@ const SocketHandler = async (req: NextApiRequest, res: any) => {
           serverSocket.to(roomId).emit("message", {
             message: formattedMessage,
             roomId: roomId,
+            roomName: room.name,
           });
         },
       );
@@ -90,18 +84,6 @@ function emitError(clientSocket: Socket, errorMessage: string) {
   clientSocket.emit("chat-error", {
     message: errorMessage,
   });
-}
-
-async function userHasAccessToRoom(
-  userEmail: string,
-  roomId: string,
-): Promise<boolean> {
-  const room = await RoomsStorage.getRoomById(roomId);
-
-  return (
-    !room ||
-    !room.users.find((user) => user.email === userEmail)
-  );
 }
 
 export default SocketHandler;
