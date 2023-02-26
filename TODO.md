@@ -24,9 +24,12 @@
       one socket created initially. onConnect join all myRooms
       when a room is joined/created/deleted sub/unsub from that socket room
 
-- [ ] Allow admin to delete the room
+- [x] Allow admin to delete the room
         then emit "room-deleted" event with the roomId to that room
         clients then should remove their ws subscription (leave room) 
+- [x] When a room disappears from myRooms list "leave" it (unsub on ws server)
+        ! review code again
+
 - [ ] Try Framer Motion for page load animations
 - [ ] Typesafe env vars access
 

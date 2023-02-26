@@ -5,6 +5,7 @@ import { Server, Socket } from "socket.io";
 import uuid from "react-uuid";
 import { RoomsStorage } from "@/server/prisma/RoomStorage";
 import { mySafeParse } from "@/utils/mySafeParse";
+import { CompletionTriggerKind } from "typescript";
 
 const SocketHandler = async (req: NextApiRequest, res: any) => {
   if (!res.socket.server.io) {

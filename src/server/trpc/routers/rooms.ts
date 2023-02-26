@@ -1,5 +1,6 @@
 import { UUID } from "@/models/commonSchemas";
 import { RoomModel, roomNameSchema, RoomSchema } from "@/models/RoomModel";
+import prismaClient from "@/server/prisma/prismaclient";
 import { RoomsStorage } from "@/server/prisma/RoomStorage";
 import { myParse, mySafeParse } from "@/utils/mySafeParse";
 import { TRPCError } from "@trpc/server";
@@ -86,6 +87,32 @@ const roomsRouter = router({
         await RoomsStorage.addUserToRoom(roomId, userEmail);
 
         return room;
+      },
+    ),
+
+  deleteRoom: requireAuthProcedure
+    .input(
+      z.object({
+        roomId: UUID,
+      }),
+    )
+    .mutation(
+      async ({ ctx: { session }, input: { roomId } }): Promise<UUID> => {
+        const room = await RoomsStorage.getRoomById(roomId);
+        if (!room) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Room does not exist",
+          });
+        }
+        if (room.admin.email !== session.user.email) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "You are not the room admin",
+          });
+        }
+
+        return RoomsStorage.deleteRoom(roomId);
       },
     ),
 });

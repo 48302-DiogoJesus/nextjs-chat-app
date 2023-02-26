@@ -1,5 +1,7 @@
+import { UUID } from "@/models/commonSchemas";
 import { RoomModel, roomNameSchema, RoomSchema } from "@/models/RoomModel";
 import { myParse } from "@/utils/mySafeParse";
+import { Prisma, PrismaClient } from "@prisma/client";
 import prismaClient from "./prismaclient";
 import { userPublicModelSelection } from "./selections/UserPublicModelSelection";
 
@@ -14,12 +16,12 @@ import { userPublicModelSelection } from "./selections/UserPublicModelSelection"
  */
 
 export const RoomsStorage = {
-  getMyRooms: (email: string): Promise<RoomModel[]> =>
-    prismaClient.room.findMany({
+  getMyRooms: (userEmail: string, tx?: PrismaClient): Promise<RoomModel[]> =>
+    (tx ? tx : prismaClient).room.findMany({
       where: {
         users: {
           some: {
-            email: email,
+            email: userEmail,
           },
         },
       },
@@ -29,8 +31,8 @@ export const RoomsStorage = {
       },
     }).then((rooms) => rooms.map((room) => myParse(RoomSchema, room))),
 
-  getRoomById: (roomId: string): Promise<RoomModel | null> =>
-    prismaClient.room.findUnique({
+  getRoomById: (roomId: UUID, tx?: PrismaClient): Promise<RoomModel | null> =>
+    (tx ? tx : prismaClient).room.findUnique({
       where: {
         id: roomId,
       },
@@ -43,8 +45,9 @@ export const RoomsStorage = {
   createRoomAndSetAdmin: (
     roomName: string,
     adminEmail: string,
+    tx?: PrismaClient,
   ): Promise<RoomModel> =>
-    prismaClient.room.create({
+    (tx ? tx : prismaClient).room.create({
       data: {
         name: roomName,
         admin: {
@@ -64,8 +67,8 @@ export const RoomsStorage = {
       },
     }).then((room) => myParse(RoomSchema, room)),
 
-  addUserToRoom: (roomId: string, userEmail: string) =>
-    prismaClient.room.update({
+  addUserToRoom: (roomId: UUID, userEmail: string, tx?: PrismaClient) =>
+    (tx ? tx : prismaClient).room.update({
       where: { id: roomId },
       data: {
         users: {
@@ -77,4 +80,11 @@ export const RoomsStorage = {
         users: userPublicModelSelection,
       },
     }).then((room) => myParse(RoomSchema, room)),
+
+  deleteRoom: (roomId: UUID, tx?: PrismaClient): Promise<UUID> =>
+    (tx ? tx : prismaClient).room.delete({
+      where: {
+        id: roomId,
+      },
+    }).then((roomDeleted) => roomDeleted.id),
 };

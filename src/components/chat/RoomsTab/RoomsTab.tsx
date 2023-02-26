@@ -5,6 +5,8 @@ import CreateJoinRoom from "./CreateJoinRoom"
 import { launchModal } from "@/components/modals/Modal"
 import Loader from "@/components/Loader";
 import { UUID } from "@/models/commonSchemas";
+import { useSession } from "next-auth/react"
+import { UserPublicModel } from "@/models/UserPublicModel"
 
 export type RoomsTabProps = {
   rooms: RoomModel[] | null
@@ -12,21 +14,21 @@ export type RoomsTabProps = {
 
   onRoomSelected: (room: RoomModel) => void
   onRoomAdded: (room: RoomModel) => void
-  // onRoomRemoved: (oldRoom: RoomModel) => void // When removing rooms feature is added
 }
 
 export default function RoomsTab(
   { rooms, selectedRoom, onRoomSelected, onRoomAdded }: RoomsTabProps
 ) {
+  const { data } = useSession()
+  const me: UserPublicModel | null = data?.user ?? null
 
   // * TRPC * \\
   const trpcCtx = trpc.useContext()
 
   const { mutate: createRoom } = trpc.rooms.createRoom.useMutation({
     onSuccess: (room) => {
-      trpcCtx.rooms.getMyRooms.invalidate()
-      onRoomSelected(room)
       onRoomAdded(room)
+      trpcCtx.rooms.getMyRooms.invalidate()
     },
     onError: (err) => {
       launchModal({
@@ -39,12 +41,20 @@ export default function RoomsTab(
 
   const { mutate: joinRoom } = trpc.rooms.joinRoom.useMutation({
     onSuccess: (room) => {
-      trpcCtx.rooms.getMyRooms.invalidate()
-      onRoomSelected(room)
       onRoomAdded(room)
+      trpcCtx.rooms.getMyRooms.invalidate()
     },
     onError: ({ message }) => {
       launchModal({ title: "Error joining room", message, closeAutomaticAfterSeconds: 10 })
+    }
+  })
+
+  const { mutate: deleteRoom } = trpc.rooms.deleteRoom.useMutation({
+    onSuccess: (roomId) => {
+      trpcCtx.rooms.getMyRooms.invalidate()
+    },
+    onError: ({ message }) => {
+      launchModal({ title: "Error deleting room", message, closeAutomaticAfterSeconds: 10 })
     }
   })
 
@@ -97,6 +107,12 @@ export default function RoomsTab(
                     key={room.id}
                     room={room}
                     isSelected={room.id === selectedRoom?.id}
+
+                    onDeleteRoom={
+                      me?.email === room.admin.email
+                        ? (roomId) => deleteRoom({ roomId })
+                        : null
+                    }
 
                     onClicked={() => onRoomSelected(room)}
                   />

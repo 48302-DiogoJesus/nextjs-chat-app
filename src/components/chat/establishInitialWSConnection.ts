@@ -13,15 +13,21 @@ export async function establishInitialWSConnection(
   getSelectedRoom: () => RoomModel | null,
   publishNotification: (notification: Notification) => void,
   setSocket: (s: Socket) => void,
-) {
+): Promise<Socket> {
   await fetch("/api/ws/chat");
   const socket = io();
   setSocket(socket);
 
   socket.on("connect", () => {
-    for (const room of rooms) {
-      socket.emit("join-room", { roomId: room.id });
-    }
+    setRoomsMessages((prev) => {
+      for (const room of rooms) {
+        socket.emit("join-room", { roomId: room.id });
+        // Set in-memory room messages to []
+        prev.set(room.id, []);
+      }
+      // To force re-render :(
+      return new Map(prev);
+    });
   });
 
   socket.on("chat-error", ({ message }) => {
@@ -45,12 +51,12 @@ export async function establishInitialWSConnection(
       message.createdAt = new Date(message.createdAt);
 
       setRoomsMessages((prev) => {
-        const messages = prev.get(roomId);
-        if (messages) {
-          messages.push(message);
-        } else {
-          prev.set(roomId, [message]);
+        const roomMeta = prev.get(roomId);
+        if (!roomMeta) {
+          return prev;
         }
+
+        roomMeta.push(message);
         // To force re-render :(
         return new Map(prev);
       });
@@ -65,4 +71,6 @@ export async function establishInitialWSConnection(
       }
     },
   );
+
+  return socket;
 }
