@@ -5,13 +5,12 @@
 @layer base {
     body {
         @apply w-screen h-screen bg-gray-900 ;
-        font-family: 'Roboto';
     }
 }
 
 @layer components {
     .btn {
-        @apply shadow-lg text-lg hover:-translate-y-[1px] transition-all;
+        @apply shadow-lg text-lg transition-all;
     }
 
     .input {

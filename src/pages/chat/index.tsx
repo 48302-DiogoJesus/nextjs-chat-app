@@ -35,7 +35,7 @@ export default function ChatPage() {
 				setSelectedRoom(rooms[0])
 			}
 		},
-		onError: ({ message }) => launchModal({ title: "Error getting your list of rooms", message })
+		onError: ({ message }) => launchModal({ title: "Error getting your list of rooms", content: message })
 		,
 		refetchInterval: 15 * 1000
 	})

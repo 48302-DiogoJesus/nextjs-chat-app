@@ -33,7 +33,7 @@ export async function establishInitialWSConnection(
   socket.on("chat-error", ({ message }) => {
     launchModal({
       title: "Chat Error",
-      message,
+      content: message,
       closeAutomaticAfterSeconds: 10,
     });
   });

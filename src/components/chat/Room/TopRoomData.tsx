@@ -1,5 +1,6 @@
+import { launchModal } from "@/components/modals/Modal"
 import { RoomModel } from "@/models/RoomModel"
-import { copyIcon } from "@/_resources/icons"
+import { copyIcon, crownIcon } from "@/_resources/icons"
 import { useState } from "react"
 
 type TopRoomData = {
@@ -39,12 +40,34 @@ export default function TopRoomData(
         <span>{room.admin.name}</span>
       </p>
 
-      <p className="text-gray-400">
-        <span className="font-bold text-lg">Members: </span>
-        <span>
-          {room.users.map(member => `${member.name}`).join(', ')}
-        </span>
-      </p>
+      <span
+        className="btn text-sm h-10 min-h-0 my-2 bg-gray-800 hover:bg-gray-700"
+        onClick={() => {
+          launchModal({
+            title: `Members of: "${room.name}"`,
+            content: room.users.map(user =>
+              <div className="
+                w-full flex flex-col items-center justify-start overflow-auto max-h-[50vh]
+              ">
+                <div className="
+                  py-2 my-1 rounded-md h-12 flex items-center justify-center
+                  text-xl font-medium text-center 
+                  bg-gray-700 w-[90%] 
+                  transition-all
+                ">
+                  {user.name}
+                  {user.email === room.admin.email &&
+                    <span className="mx-1 text-gray-500 flex gap-2">
+                      <span> (Admin)</span>
+                      <span className="fill-yellow-400">{crownIcon}</span>
+                    </span>
+                  }
+                </div>
+              </div>
+            )
+          })
+        }}
+      >Show members</span>
     </div>
   )
 }

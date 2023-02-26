@@ -6,7 +6,7 @@ const ModalTriggerId = `${ModalId}-trigger`
 
 type ModalParams = {
   title: string,
-  message?: string,
+  content?: string | React.ReactNode,
   showButtons?: boolean,
   closeAutomaticAfterSeconds?: number
 }
@@ -31,11 +31,11 @@ export function SimpleModal() {
 
   const modalTriggerElem = useRef<HTMLInputElement>(null)
   const [showButtons, setShowButtons] = useState<boolean>(false)
+  const [modalTitle, setModalTitle] = useState<React.ReactNode>(null)
+  const [modalContent, setModalContent] = useState<React.ReactNode>(null)
 
   useEffect(() => {
     const modal: HTMLInputElement = window.document.querySelector(`#${ModalId}`)!
-    const modalTitle: HTMLInputElement = modal.querySelector(".title")!
-    const modalMessage: HTMLInputElement = modal.querySelector(".message")!
 
     let closeTimeout: NodeJS.Timeout | null = null
 
@@ -44,11 +44,12 @@ export function SimpleModal() {
         clearTimeout(closeTimeout)
 
       if (event.type == EventType.OPEN) {
-        const { title, message, showButtons, closeAutomaticAfterSeconds } = event.params!
+        const { title, content, showButtons, closeAutomaticAfterSeconds } = event.params!
 
-        modalTitle.innerText = title
-        modalMessage.innerText = message ?? ''
+        setModalTitle(title)
+        setModalContent(content)
         setShowButtons(showButtons ?? true)
+
         if (closeAutomaticAfterSeconds) {
           closeTimeout = setTimeout(closeModal, closeAutomaticAfterSeconds * 1000)
         }
@@ -74,9 +75,8 @@ export function SimpleModal() {
       <input ref={modalTriggerElem} type="checkbox" id={ModalTriggerId} className="modal-toggle" />
       <label id={ModalId} htmlFor={ModalTriggerId} className="modal cursor-pointer">
         <label className="modal-box flex flex-col justify-center items-center" htmlFor="">
-          <h3 className="title text-xl font-bold"></h3>
-          <p className="message py-4"></p>
-
+          <h2 className="title text-2xl font-bold">{modalTitle}</h2>
+          <p className="message py-4 w-full text-center">{modalContent}</p>
           {
             showButtons &&
             <div id="buttons" className="pt-2 flex items-center justify-end">

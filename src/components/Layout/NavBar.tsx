@@ -11,9 +11,8 @@ export default function NavBar() {
 		<nav
 			id="navbar"
 			className="
-					w-screen
+					w-screen p-4
 					flex items-center justify-between
-					p-4
 					bg-gray-800
 					shadow-xl
 			"
@@ -21,7 +20,7 @@ export default function NavBar() {
 			<span
 				className="
 					opacity-60
-					text-4xl text-gray-400 font-extrabold
+					text-4xl text-gray-400 font-semibold
 					hover:cursor-pointer hover:opacity-50
 				"
 				onClick={() => router.push("/")}

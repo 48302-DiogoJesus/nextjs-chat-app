@@ -34,7 +34,7 @@ export default function RoomsTab(
     onError: (err) => {
       launchModal({
         title: "Error creating room",
-        message: err.message,
+        content: err.message,
         closeAutomaticAfterSeconds: 10
       })
     }
@@ -46,7 +46,7 @@ export default function RoomsTab(
       trpcCtx.rooms.getMyRooms.invalidate()
     },
     onError: ({ message }) => {
-      launchModal({ title: "Error joining room", message, closeAutomaticAfterSeconds: 10 })
+      launchModal({ title: "Error joining room", content: message, closeAutomaticAfterSeconds: 10 })
     }
   })
 
@@ -55,7 +55,7 @@ export default function RoomsTab(
       trpcCtx.rooms.getMyRooms.invalidate()
     },
     onError: ({ message }) => {
-      launchModal({ title: "Error deleting room", message, closeAutomaticAfterSeconds: 10 })
+      launchModal({ title: "Error deleting room", content: message, closeAutomaticAfterSeconds: 10 })
     }
   })
 
@@ -69,7 +69,7 @@ export default function RoomsTab(
     if (!UUID.safeParse(roomId).success) {
       launchModal({
         title: "Invalid Room Id",
-        message: "Valid room id example: 2f9d7416-d3d7-4802-be54-2aa57c9b7f58"
+        content: "Ex: 2f9d7416-d3d7-4802-be54-2aa57c9b7f58"
       })
     } else {
       joinRoom({ roomId })

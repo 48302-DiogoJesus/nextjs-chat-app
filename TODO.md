@@ -33,7 +33,8 @@
 - [x] Temporary Text saying "room id copied to clipboard"
 - [x] Try Framer Motion for page load animations
 
-- [ ] Put Inter Font as primary font and Roboto as secondary
+- [x] Put Inter Font as primary font
+- [x] Button that opens a modal to see the list of room members
 - [ ] Allow admins to change room name
 
 - [ ] Limit the number of users in the room members UI
