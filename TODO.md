@@ -30,6 +30,8 @@
 - [x] When a room disappears from myRooms list "leave" it (unsub on ws server)
         ! review code again
 
+- [ ] Tooltip for copy room id
+
 - [ ] Try Framer Motion for page load animations
 - [ ] Typesafe env vars access
 
