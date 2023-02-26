@@ -29,11 +29,9 @@
         clients then should remove their ws subscription (leave room) 
 - [x] When a room disappears from myRooms list "leave" it (unsub on ws server)
         ! review code again
-
-- [ ] Tooltip for copy room id
-
-- [ ] Try Framer Motion for page load animations
-- [ ] Typesafe env vars access
+- [x] Tooltip for copy room id
+- [x] Temporary Text saying "room id copied to clipboard"
+- [x] Try Framer Motion for page load animations
 
 - [ ] Put Inter Font as primary font and Roboto as secondary
 - [ ] Allow admins to change room name
@@ -45,12 +43,14 @@
 - [ ] Add google oauth (maybe not since only defined test users can use it)  
 
 - [ ] Understand conventions around project structure (src/ app/ lib/ server/ ??)
+- [ ] Understand nextjs conventions for SSR, CSR and SSG
+
+- [ ] Look at which operations should be in a transaction
 
 ### Notes
 
 - Rooms can exist "forever" (in database) with users associated to them.
   Conversations are not stored persistently (only exist while the server instance is running)
-
 
 ### React
 

@@ -31,10 +31,9 @@ export default function BottomInput(
           sendMessageInputRef.current!.value = ""
         }}
         className="
-          btn  
-          mx-4
-          bg-red
-          hover:bg-red hover:opacity-90
+          btn mx-4
+          bg-orange-700 text-white
+          hover:bg-orange-800 hover:opacity-90
         "
       >
         Send

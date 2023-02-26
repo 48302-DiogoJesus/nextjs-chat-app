@@ -1,6 +1,6 @@
 import { establishInitialWSConnection } from "@/components/chat/establishInitialWSConnection"
 import Room from "@/components/chat/Room/Room"
-import RoomsTab from "@/components/chat/RoomsTab/RoomsTab"
+import RoomsTab from "@/components/chat/RoomsTab/RoomsTab";
 import { launchModal } from "@/components/modals/Modal"
 import { useNotifications } from "@/components/notifications/NotificationCtx";
 import { useRefHotValue, useStateHotValue } from "@/hooks/useStateWithRef"
@@ -9,6 +9,7 @@ import { MessageModel } from "@/models/MessageModel"
 import { RoomModel } from "@/models/RoomModel"
 import ProtectSSRPage from "@/utils/protectPage"
 import { trpc } from "@/utils/trpc"
+import { motion } from "framer-motion";
 import { NextPageContext } from "next/dist/shared/lib/utils"
 import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
@@ -34,9 +35,8 @@ export default function ChatPage() {
 				setSelectedRoom(rooms[0])
 			}
 		},
-		onError: ({ message }) => {
-			launchModal({ title: "Error getting your list of rooms", message })
-		},
+		onError: ({ message }) => launchModal({ title: "Error getting your list of rooms", message })
+		,
 		refetchInterval: 15 * 1000
 	})
 	const myRooms: RoomModel[] | null = data ?? null
@@ -97,12 +97,22 @@ export default function ChatPage() {
 		getHotSocket()?.emit('client-message', { message, roomId })
 	}
 
+	const variants = {
+		hidden: { opacity: 0, x: 0, y: -100, scale: 0 },
+		enter: { opacity: 1, x: 0, y: 0, scale: 1 },
+	}
+
 	return (
-		<div
+		<motion.div
 			id="chat-page"
 			className="
 				flex flex-col lg:flex-row items-center lg:items-start justify-center
 			"
+
+			variants={variants}
+			initial="hidden"
+			animate="enter"
+			transition={{ type: 'linear' }}
 		>
 			<RoomsTab
 				rooms={myRooms}
@@ -119,7 +129,7 @@ export default function ChatPage() {
 					onSendMessage={onSendMessage}
 				/>
 			}
-		</div>
+		</motion.div>
 	)
 }
 

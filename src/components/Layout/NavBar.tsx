@@ -42,7 +42,7 @@ export default function NavBar() {
 						className="btn"
 						onClick={() => signOut()}
 					>
-						<span className="mr-2">{githubIcon}</span>
+						{githubIcon}
 						<span>Sign Out</span>
 					</button>
 					: null

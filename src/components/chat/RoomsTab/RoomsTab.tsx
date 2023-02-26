@@ -1,12 +1,13 @@
 import { RoomModel } from "@/models/RoomModel"
 import { trpc } from "@/utils/trpc"
-import RoomCard from "./RoomCard"
 import CreateJoinRoom from "./CreateJoinRoom"
 import { launchModal } from "@/components/modals/Modal"
 import Loader from "@/components/Loader";
 import { UUID } from "@/models/commonSchemas";
 import { useSession } from "next-auth/react"
 import { UserPublicModel } from "@/models/UserPublicModel"
+import { useState } from "react"
+import { RoomCard } from "./RoomCard";
 
 export type RoomsTabProps = {
   rooms: RoomModel[] | null
@@ -65,7 +66,7 @@ export default function RoomsTab(
   }
 
   const onJoinRoom = (roomId: string) => {
-    if (UUID.safeParse(roomId).success) {
+    if (!UUID.safeParse(roomId).success) {
       launchModal({
         title: "Invalid Room Id",
         message: "Valid room id example: 2f9d7416-d3d7-4802-be54-2aa57c9b7f58"
@@ -98,7 +99,7 @@ export default function RoomsTab(
             </div>
 
             <div className="
-              flex flex-row lg:flex-col gap-3 
+              flex justify-center flex-row lg:flex-col gap-3 
               max-h-[60vh] overflow-x-visible overflow-y-scroll
             ">
               <>
