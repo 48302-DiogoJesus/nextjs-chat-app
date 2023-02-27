@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "dev:wss": "tsx watch src/server/wsServer.ts",
+    "dev:wss": "tsx watch src/server/trpc/wsServerDev.ts",
     "build": "next build",
-    "start": "next start",
+    "start": "next build && next start",
     "lint": "next lint",
     "dev:dbmig": "npx prisma migrate dev",
     "dev:dbreset": "npx prisma migrate reset && npx prisma migrate dev && npx prisma generate",

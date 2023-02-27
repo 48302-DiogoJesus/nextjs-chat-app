@@ -21,7 +21,7 @@ import { useState } from "react";
 export default function ChatPage() {
 	const { publishNotification } = useNotifications()
 
-	const [selectedRoom, setSelectedRoom] = useState<RoomModel | null>(null)
+	const [selectedRoom, getHotSelectedRoom, setSelectedRoom] = useStateHotValue<RoomModel | null>(null)
 
 	// Store messages for all user rooms (selected + others)
 	const [roomsMessages, setRoomsMessages] = useState<Map<UUID, MessageModel[]>>(new Map())
@@ -57,10 +57,11 @@ export default function ChatPage() {
 				return new Map(prev)
 			})
 
-			if (selectedRoom && selectedRoom.id !== emission.roomId) {
+			const hotSelectedRoom = getHotSelectedRoom()
+			if (hotSelectedRoom && hotSelectedRoom.id !== emission.roomId) {
 				publishNotification({
 					title: `${emission.roomName}`,
-					content: `(${emission.message.author}): ${emission.message.content}`
+					content: `(${emission.message.author.name}): ${emission.message.content}`
 				})
 			}
 		}

@@ -13,21 +13,49 @@ type Emission = {
   message: MessageModel;
 };
 
+type UserObserver = {
+  id: UUID;
+  observer: Observer<Emission, null /*Error type (explore later)*/>;
+};
+
 const observers = new Map<
   String, // User Email
-  Observer<
-    Emission,
-    null /*Error type (explore later)*/
-  >
+  UserObserver[]
 >();
 
 export const wsRouter = router({
   subscribeMessages: requireAuthProcedure
     .subscription(
       async ({ ctx: { session } }) => {
-        return observable<Emission, null>((clientEmitter) => {
-          observers.set(session.user.email, clientEmitter);
-          return () => observers.delete(session.user.email);
+        console.log("Subbed", session.user.email);
+        return observable<Emission, null>((clientObserver) => {
+          const userObservers = observers.get(session.user.email);
+
+          const newUserObserver = {
+            id: uuid(),
+            observer: clientObserver,
+          };
+
+          if (!userObservers) {
+            observers.set(session.user.email, [newUserObserver]);
+          } else {
+            // * Later push to it to avoid creating a new array
+            observers.set(session.user.email, [
+              ...userObservers,
+              newUserObserver,
+            ]);
+          }
+          return () => {
+            const userObservers = observers.get(session.user.email);
+            if (!userObservers) {
+              return;
+            }
+            // Remove observer from user
+            userObservers.splice(
+              userObservers.findIndex((obs) => obs.id === newUserObserver.id),
+              1,
+            );
+          };
         });
       },
     ),
@@ -57,19 +85,18 @@ export const wsRouter = router({
         createdAt: new Date(),
       };
 
-      const roomObservers = room.users
+      const roomUsersObservers = room.users
         .map((user) => observers.get(user.email))
-        .filter((it) => it !== null && it !== undefined) as Observer<
-          Emission,
-          null
-        >[];
+        .filter((it) => it !== null && it !== undefined) as UserObserver[][];
 
       // Send message to all observers
-      for (const observer of roomObservers) {
-        observer.next({
-          roomId: roomId,
-          roomName: room.name,
-          message: formattedMessage,
+      for (const userObservers of roomUsersObservers) {
+        userObservers.forEach((userObserver) => {
+          userObserver.observer.next({
+            roomId: roomId,
+            roomName: room.name,
+            message: formattedMessage,
+          });
         });
       }
     }),
