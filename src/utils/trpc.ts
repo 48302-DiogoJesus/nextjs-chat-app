@@ -20,12 +20,11 @@ function getEndingLink(ctx: NextPageContext | undefined) {
       },
     });
   }
-  // ! REMOVE HARDCODED
-  const client = createWSClient({
-    url: `ws://localhost:3001`,
-  });
+  // ! REMOVE HARDCODED WS LINK
   return wsLink<AppRouter>({
-    client,
+    client: createWSClient({
+      url: `ws://localhost:3001`,
+    }),
   });
 }
 
@@ -45,7 +44,7 @@ export const trpc = createTRPCNext<AppRouter>({
   /**
    * @link https://trpc.io/docs/ssr
    */
-  ssr: true,
+  ssr: false,
 });
 
 function getBaseUrl() {

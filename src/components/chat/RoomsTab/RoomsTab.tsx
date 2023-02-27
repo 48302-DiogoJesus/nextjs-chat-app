@@ -6,7 +6,6 @@ import Loader from "@/components/Loader";
 import { UUID } from "@/models/commonSchemas";
 import { useSession } from "next-auth/react"
 import { UserPublicModel } from "@/models/UserPublicModel"
-import { useState } from "react"
 import { RoomCard } from "./RoomCard";
 
 export type RoomsTabProps = {

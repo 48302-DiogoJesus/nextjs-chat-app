@@ -39,7 +39,7 @@ const t = initTRPC.context<Context>().create({
   },
 });
 
-export const requireAuthMW = t.middleware(async ({ ctx, next }) => {
+const requireAuthMW = t.middleware(async ({ ctx, next }) => {
   const session: Session | null = await getSession({ ctx });
 
   if (!session) {
