@@ -42,8 +42,9 @@
 
 - [x] PGSQL DB in railways ( its slow :( )
 
-- [ ] Update .env.example
-- [ ] Deploy on vercel
+- [x] Deploy UI on vercel
+- [ ] Deploy Web Sockets Server somewhere and add to env NEXT_PUBLIC_WS_PORT + NEXT_PUBLIC_WS_URL
+
 - [ ] More UI Loaders 
 
 Features:
