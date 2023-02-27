@@ -10,6 +10,7 @@ import { RoomModel } from "@/models/RoomModel"
 import ProtectSSRPage from "@/utils/protectPage"
 import { trpc } from "@/utils/trpc"
 import { motion } from "framer-motion";
+import { getSession, useSession } from "next-auth/react";
 import { NextPageContext } from "next/dist/shared/lib/utils"
 import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
@@ -40,6 +41,14 @@ export default function ChatPage() {
 		refetchInterval: 15 * 1000
 	})
 	const myRooms: RoomModel[] | null = data ?? null
+
+	useEffect(() => {
+
+		return () => {
+			getHotSocket()?.close()
+		}
+	}, [])
+
 
 	useEffect(() => {
 		// First render

@@ -35,12 +35,18 @@
 
 - [x] Put Inter Font as primary font
 - [x] Button that opens a modal to see the list of room members
+- [x] Add magic link authentication
+
+- [ ] Fix bug where room is joined but when do show members I (who joined) do not appear there
+- [ ] Show notification when a user joins a room (emit event to all users and UI catches it) 
+- [ ] Home page with input field for email magic link
+
+- [ ] Create new outlook email for emailing purposes
+- [ ] Allow users to change their username (apply constraints with ZOD)
+- [ ] Show users avatar, if they don't have one get a random one
+
 - [ ] Allow admins to change room name
-
-- [ ] Limit the number of users in the room members UI
-
-- [ ] Add plain email/password as auth alternative
-- [ ] Add magic link authentication
+- [ ] Deploy. POSTGRESQL db + UI (on vercel? check if they support websockets)
 - [ ] Add google oauth (maybe not since only defined test users can use it)  
 
 - [ ] Understand conventions around project structure (src/ app/ lib/ server/ ??)

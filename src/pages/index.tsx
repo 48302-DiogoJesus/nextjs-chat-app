@@ -4,6 +4,9 @@ import { useRouter } from "next/router";
 import { motion } from "framer-motion"
 import { GetServerSideProps } from 'next'
 import { Session } from "next-auth";
+import { Magic } from "magic-sdk";
+import { useEffect } from "react";
+import { trpc } from "@/utils/trpc";
 
 type HomePageProps = {
   session: Session | null
@@ -61,7 +64,7 @@ export default function HomePage({ session }: HomePageProps) {
           : <button
             className="btn"
 
-            onClick={() => signIn('github')}
+            onClick={() => signIn(/* 'github' */)}
           >
             {githubIcon}
             <span>{!session ? 'Sign In' : 'Sign Out'}</span>
@@ -70,7 +73,6 @@ export default function HomePage({ session }: HomePageProps) {
     </motion.div>
   );
 }
-
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const session = await getSession(ctx)

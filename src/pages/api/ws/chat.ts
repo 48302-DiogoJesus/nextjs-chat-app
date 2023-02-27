@@ -5,10 +5,10 @@ import { Server, Socket } from "socket.io";
 import uuid from "react-uuid";
 import { RoomsStorage } from "@/server/prisma/RoomStorage";
 import { mySafeParse } from "@/utils/mySafeParse";
-import { CompletionTriggerKind } from "typescript";
 
 const SocketHandler = async (req: NextApiRequest, res: any) => {
   if (!res.socket.server.io) {
+    console.log("Getting Session to connect to socket");
     const session = await getSession({ req });
     if (!session) {
       res.writeHead(401);
@@ -20,6 +20,11 @@ const SocketHandler = async (req: NextApiRequest, res: any) => {
     res.socket.server.io = serverSocket;
 
     serverSocket.on("connection", (clientSocket: Socket) => {
+      clientSocket.on("disconnect", () => {
+        console.log("Client disconnected");
+        serverSocket.close();
+      });
+
       clientSocket.on("join-room", async ({ roomId }) => {
         const room = await RoomsStorage.getRoomById(roomId);
         const userEmail = session.user.email;

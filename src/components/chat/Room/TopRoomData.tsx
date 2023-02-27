@@ -1,6 +1,7 @@
 import { launchModal } from "@/components/modals/Modal"
 import { RoomModel } from "@/models/RoomModel"
 import { copyIcon, crownIcon } from "@/_resources/icons"
+import { useSession } from "next-auth/react"
 import { useState } from "react"
 
 type TopRoomData = {
@@ -10,7 +11,7 @@ type TopRoomData = {
 export default function TopRoomData(
   { room }: TopRoomData
 ) {
-
+  const { data: session } = useSession()
   const [copiedToClipboard, setCopiedToClipboard] = useState<boolean>(false)
 
   return (
@@ -49,12 +50,13 @@ export default function TopRoomData(
               <div className="
                 w-full flex flex-col items-center justify-start overflow-auto max-h-[50vh]
               ">
-                <div className="
+                <div className={`
                   py-2 my-1 rounded-md h-12 flex items-center justify-center
                   text-xl font-medium text-center 
-                  bg-gray-700 w-[90%] 
+                  w-[90%] 
                   transition-all
-                ">
+                  ${session?.user.email === user.email ? "bg-gray-800" : "bg-gray-700"}
+                `}>
                   {user.name}
                   {user.email === room.admin.email &&
                     <span className="mx-1 text-gray-500 flex gap-2">
@@ -67,7 +69,9 @@ export default function TopRoomData(
             )
           })
         }}
-      >Show members</span>
+      >
+        Show members
+      </span>
     </div>
   )
 }

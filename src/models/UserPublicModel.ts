@@ -6,7 +6,7 @@ export type UserPublicModel = Pick<User, "name" | "email" | "image">;
 
 export const UserPublicSchema: toZod<UserPublicModel> = z.object({
   // Currently Provided by OAuth2 so we are trusting their name validations to avoid incompatibilities
-  name: z.string(),
+  name: z.string().nullable(),
   email: z.string(),
   image: z.string().nullable(),
 });
