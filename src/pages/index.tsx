@@ -1,12 +1,10 @@
-import { githubIcon } from "@/_resources/icons";
-import { getSession, signIn, useSession } from "next-auth/react";
+import { getSession } from "next-auth/react";
 import { useRouter } from "next/router";
 import { motion } from "framer-motion"
 import { GetServerSideProps } from 'next'
 import { Session } from "next-auth";
-import { Magic } from "magic-sdk";
-import { useEffect } from "react";
-import { trpc } from "@/utils/trpc";
+import SignInDisplay from "@/components/SignInDisplay";
+import { useLoader } from "@/components/ShowLoader";
 
 type HomePageProps = {
   session: Session | null
@@ -15,6 +13,8 @@ type HomePageProps = {
 // SSR
 export default function HomePage({ session }: HomePageProps) {
   const router = useRouter()
+
+  const { setIsLoading } = useLoader()
 
   const pageAnimationVariants = {
     hidden: { opacity: 0, x: 0, y: -100 },
@@ -28,7 +28,6 @@ export default function HomePage({ session }: HomePageProps) {
         w-full
         flex flex-col items-center justify-center gap-8
       "
-
       variants={pageAnimationVariants}
       initial="hidden"
       animate="enter"
@@ -38,6 +37,7 @@ export default function HomePage({ session }: HomePageProps) {
         className="
           mt-24
           text-5xl font-extrabold text-gray-300 w-[400px] text-center
+          my-8
         "
       >
         {
@@ -57,18 +57,12 @@ export default function HomePage({ session }: HomePageProps) {
           ?
           <motion.button
             className="btn text-white bg-green-600 hover:bg-green-700"
-            onClick={() => router.push("/chat")}
+            onClick={() => { router.push("/chat"); setIsLoading(true, "Signing you in...") }}
           >
             Join Chat
           </motion.button>
-          : <button
-            className="btn"
-
-            onClick={() => signIn(/* 'github' */)}
-          >
-            {githubIcon}
-            <span>{!session ? 'Sign In' : 'Sign Out'}</span>
-          </button>
+          :
+          <SignInDisplay onSignInActivated={() => setIsLoading(true, "Signing you in...")} />
       }
     </motion.div>
   );

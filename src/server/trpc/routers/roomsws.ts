@@ -1,5 +1,6 @@
 import { UUID } from "@/models/commonSchemas";
 import { MessageModel } from "@/models/MessageModel";
+import { UserPublicModel } from "@/models/UserPublicModel";
 import { RoomsStorage } from "@/server/prisma/RoomStorage";
 import { TRPCError } from "@trpc/server";
 import { observable, Observer } from "@trpc/server/observable";
@@ -24,10 +25,37 @@ const observers = new Map<
 >();
 
 export const wsRouter = router({
+  getActiveUsers: requireAuthProcedure
+    .input(
+      z.object({
+        roomId: UUID,
+      }),
+    )
+    .query(
+      async ({ ctx: { session }, input: { roomId } }) => {
+        const room = await RoomsStorage.getRoomById(roomId);
+
+        // Check if room exists + if user can send message to it
+        if (
+          !room || !room.users.find((user) => user.email === session.user.email)
+        ) {
+          throw new TRPCError({
+            code: "UNAUTHORIZED",
+            message:
+              "Cannot send message. It either does not exist or you do not have access to it.",
+          });
+        }
+
+        const activeUsers: UserPublicModel[] = room.users.filter((user) =>
+          observers.get(user.email) !== undefined
+        );
+
+        return activeUsers;
+      },
+    ),
   subscribeMessages: requireAuthProcedure
     .subscription(
       async ({ ctx: { session } }) => {
-        console.log("Subbed", session.user.email);
         return observable<Emission, null>((clientObserver) => {
           const userObservers = observers.get(session.user.email);
 
@@ -50,11 +78,19 @@ export const wsRouter = router({
             if (!userObservers) {
               return;
             }
-            // Remove observer from user
-            userObservers.splice(
-              userObservers.findIndex((obs) => obs.id === newUserObserver.id),
-              1,
+
+            const afterRemovingThisObserver = userObservers.filter((obs) =>
+              obs.id !== newUserObserver.id
             );
+            if (afterRemovingThisObserver.length === 0) {
+              observers.delete(session.user.email);
+            } else {
+              // Remove observer from user
+              observers.set(
+                session.user.email,
+                afterRemovingThisObserver,
+              );
+            }
           };
         });
       },

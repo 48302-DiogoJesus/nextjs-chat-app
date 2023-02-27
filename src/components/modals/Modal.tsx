@@ -74,7 +74,7 @@ export function SimpleModal() {
     <>
       <input ref={modalTriggerElem} type="checkbox" id={ModalTriggerId} className="modal-toggle" />
       <label id={ModalId} htmlFor={ModalTriggerId} className="modal cursor-pointer">
-        <label className="modal-box flex flex-col justify-center items-center" htmlFor="">
+        <label className="bg-gray-700 text-gray-400 modal-box flex flex-col justify-center items-center" htmlFor="">
           <h2 className="title text-2xl font-bold">{modalTitle}</h2>
           <div className="message py-4 w-full text-center">{modalContent}</div>
           {

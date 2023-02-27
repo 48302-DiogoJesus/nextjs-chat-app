@@ -1,6 +1,8 @@
 import { launchModal } from "@/components/modals/Modal"
 import { RoomModel } from "@/models/RoomModel"
-import { copyIcon, crownIcon } from "@/_resources/icons"
+import { UserPublicModel } from "@/models/UserPublicModel"
+import { trpc } from "@/utils/trpc"
+import { copyIcon, crownIcon, onlineIcon } from "@/_resources/icons"
 import { useSession } from "next-auth/react"
 import { useState } from "react"
 
@@ -13,6 +15,11 @@ export default function TopRoomData(
 ) {
   const { data: session } = useSession()
   const [copiedToClipboard, setCopiedToClipboard] = useState<boolean>(false)
+
+  const trpcContext = trpc.useContext()
+
+  const getActiveUsers = async () =>
+    trpcContext.ws.getActiveUsers.fetch({ roomId: room.id })
 
   return (
     <div id="top-chat-room-info" className=" text-gray-200">
@@ -43,7 +50,11 @@ export default function TopRoomData(
 
       <span
         className="btn text-sm h-10 min-h-0 my-2 bg-gray-800 hover:bg-gray-700"
-        onClick={() => {
+        onClick={async () => {
+          const activeUsers = await getActiveUsers()
+          const isUserActive = (user: UserPublicModel) =>
+            activeUsers.find(u => u.email === user.email)
+
           launchModal({
             title: `Members of: "${room.name}"`,
             content: room.users.map(user =>
@@ -57,8 +68,9 @@ export default function TopRoomData(
                   text-xl font-medium text-center 
                   w-[90%] 
                   transition-all
-                  ${session?.user.email === user.email ? "bg-gray-800" : "bg-gray-700"}
+                  ${session?.user.email === user.email ? "bg-gray-800" : "bg-gray-900"}
                 `}>
+                  {isUserActive(user) ? onlineIcon : null}
                   {user.name}
                   {user.email === room.admin.email &&
                     <span className="mx-1 text-gray-500 flex gap-2">
@@ -74,6 +86,6 @@ export default function TopRoomData(
       >
         Show members
       </span>
-    </div>
+    </div >
   )
 }

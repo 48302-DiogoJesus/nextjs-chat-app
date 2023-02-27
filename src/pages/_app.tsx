@@ -8,6 +8,7 @@ import { trpc } from '@/utils/trpc';
 import { SessionProvider } from 'next-auth/react';
 import { NotificationsProvider } from '@/components/notifications/NotificationsComponent';
 import NavBar from '@/components/Layout/NavBar';
+import { LoaderProvider } from '@/components/ShowLoader';
 
 const inter = Inter({
     subsets: ['latin'],
@@ -21,7 +22,9 @@ function App({ Component, pageProps }: AppProps) {
             <SessionProvider session={pageProps.session}>
                 <NotificationsProvider>
                     <NavBar />
-                    <Component  {...pageProps} />
+                    <LoaderProvider>
+                        <Component  {...pageProps} />
+                    </LoaderProvider>
                 </NotificationsProvider>
             </SessionProvider>
             <SimpleModal />

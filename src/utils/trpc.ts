@@ -6,14 +6,15 @@ import superjson from "superjson";
 
 function getEndingLink(ctx: NextPageContext | undefined) {
   if (typeof window === "undefined") {
+    // Runs on the server
     return httpBatchLink({
       url: `${getBaseUrl()}/api/trpc`,
     });
   } else {
-    // ! REMOVE HARDCODED WS LINK
+    // Runs on the browser
     return wsLink<AppRouter>({
       client: createWSClient({
-        url: `ws://localhost:3001`,
+        url: getWSBaseLink(),
       }),
     });
   }
@@ -36,22 +37,27 @@ export const trpc = createTRPCNext<AppRouter>({
   ssr: false,
 });
 
+// Runs on server
 function getBaseUrl() {
-  if (typeof window !== "undefined") {
-    // browser should use relative path
-    return "";
-  }
+  const SERVER_PORT = process.env.PORT!;
 
   if (process.env.VERCEL_URL) {
     // reference for vercel.com
     return `https://${process.env.VERCEL_URL}`;
   }
 
-  if (process.env.RENDER_INTERNAL_HOSTNAME) {
-    // reference for render.com
-    return `http://${process.env.RENDER_INTERNAL_HOSTNAME}:${process.env.PORT}`;
+  // assume localhost
+  return `http://localhost:${SERVER_PORT}`;
+}
+
+function getWSBaseLink() {
+  const WS_PORT = parseInt(process.env.NEXT_PUBLIC_WS_PORT!);
+
+  if (process.env.VERCEL_URL) {
+    // reference for vercel.com
+    return `ws://${process.env.VERCEL_URL}:${WS_PORT}`;
   }
 
   // assume localhost
-  return `http://localhost:${process.env.PORT ?? 3000}`;
+  return `ws://localhost:${WS_PORT}`;
 }

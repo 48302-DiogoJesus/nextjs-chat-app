@@ -36,23 +36,25 @@
 - [x] Put Inter Font as primary font
 - [x] Button that opens a modal to see the list of room members
 - [x] Add magic link authentication
+- [x] When listing room members show which ones are active
 
-- [ ] Fix bug where room is joined but when do show members I (who joined) do not appear there
-- [ ] Show notification when a user joins a room (emit event to all users and UI catches it) 
-- [ ] Home page with input field for email magic link
+- [x] Home page with input field for email magic link
 
-- [ ] Create new outlook email for emailing purposes
+- [x] PGSQL DB in railways ( its slow :( )
+
+- [ ] Update .env.example
+- [ ] Deploy on vercel
+- [ ] More UI Loaders 
+
+Features:
 - [ ] Allow users to change their username (apply constraints with ZOD)
-- [ ] Show users avatar, if they don't have one get a random one
-
 - [ ] Allow admins to change room name
-- [ ] Deploy. POSTGRESQL db + UI (on vercel? check if they support websockets)
-- [ ] Add google oauth (maybe not since only defined test users can use it)  
 
-- [ ] Understand conventions around project structure (src/ app/ lib/ server/ ??)
-- [ ] Understand nextjs conventions for SSR, CSR and SSG
+- [ ] Understand nextjs conventions for SSR, CSR and SSG. Then refactor accordingly
 
 - [ ] Look at which operations should be in a transaction
+
+- [ ] Add google oauth (maybe not since only defined test users can use it)  
 
 ### Notes
 
