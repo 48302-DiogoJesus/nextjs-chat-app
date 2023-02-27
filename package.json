@@ -6,7 +6,7 @@
     "dev": "npm run dev:wss & next dev",
     "dev:wss": "tsx watch src/server/trpc/wsServerDev.ts",
     "build": "next build",
-    "start": "next build && next start",
+    "start": "next build && npm run dev:wss & next start",
     "lint": "next lint",
     "dev:dbmig": "npx prisma migrate dev",
     "dev:dbreset": "npx prisma migrate reset && npx prisma migrate dev && npx prisma generate",
