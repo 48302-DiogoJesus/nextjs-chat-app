@@ -8,33 +8,22 @@ function getEndingLink(ctx: NextPageContext | undefined) {
   if (typeof window === "undefined") {
     return httpBatchLink({
       url: `${getBaseUrl()}/api/trpc`,
-      headers() {
-        if (ctx?.req) {
-          // on ssr, forward client's headers to the server
-          return {
-            ...ctx.req.headers,
-            "x-ssr": "1",
-          };
-        }
-        return {};
-      },
+    });
+  } else {
+    // ! REMOVE HARDCODED WS LINK
+    return wsLink<AppRouter>({
+      client: createWSClient({
+        url: `ws://localhost:3001`,
+      }),
     });
   }
-  // ! REMOVE HARDCODED WS LINK
-  return wsLink<AppRouter>({
-    client: createWSClient({
-      url: `ws://localhost:3001`,
-    }),
-  });
 }
 
 export const trpc = createTRPCNext<AppRouter>({
   config({ ctx }) {
     return {
       transformer: superjson,
-      links: [
-        getEndingLink(ctx),
-      ],
+      links: [getEndingLink(ctx)],
       /**
        * @link https://tanstack.com/query/v4/docs/reference/QueryClient
        */

@@ -25,8 +25,6 @@ export const wsRouter = router({
   subscribeMessages: requireAuthProcedure
     .subscription(
       async ({ ctx: { session } }) => {
-        console.log("Sub allowed");
-
         return observable<Emission, null>((clientEmitter) => {
           observers.set(session.user.email, clientEmitter);
           return () => observers.delete(session.user.email);
@@ -68,8 +66,6 @@ export const wsRouter = router({
 
       // Send message to all observers
       for (const observer of roomObservers) {
-        console.log("Emitting another message", message, "| Room id", roomId);
-
         observer.next({
           roomId: roomId,
           roomName: room.name,

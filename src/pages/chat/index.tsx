@@ -23,9 +23,11 @@ export default function ChatPage() {
 
 	const [selectedRoom, setSelectedRoom] = useState<RoomModel | null>(null)
 
+	// Store messages for all user rooms (selected + others)
 	const [roomsMessages, setRoomsMessages] = useState<Map<UUID, MessageModel[]>>(new Map())
 	const { data } = trpc.rooms.getMyRooms.useQuery(undefined, {
 		onSuccess: (rooms) => {
+			// Select a new room if needed
 			if (rooms.length === 0) {
 				setSelectedRoom(null)
 			} else {
@@ -43,7 +45,6 @@ export default function ChatPage() {
 	const { mutate: sendMessage } = trpc.ws.sendMessage.useMutation()
 	trpc.ws.subscribeMessages.useSubscription(undefined, {
 		onData: (emission) => {
-			console.log("Got message", emission)
 			setRoomsMessages(prev => {
 				const roomMessages = prev.get(emission.roomId)
 				if (roomMessages) {
@@ -66,7 +67,6 @@ export default function ChatPage() {
 	})
 
 	const onSendMessage = (message: string, roomId: string) => {
-		console.log("Sending message", { message, roomId })
 		sendMessage({ roomId, message })
 	}
 

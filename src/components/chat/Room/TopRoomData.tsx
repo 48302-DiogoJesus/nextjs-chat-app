@@ -47,7 +47,9 @@ export default function TopRoomData(
           launchModal({
             title: `Members of: "${room.name}"`,
             content: room.users.map(user =>
-              <div className="
+              <div
+                key={user.email}
+                className="
                 w-full flex flex-col items-center justify-start overflow-auto max-h-[50vh]
               ">
                 <div className={`

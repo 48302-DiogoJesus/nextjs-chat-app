@@ -10,7 +10,7 @@ export type RoomModel = Pick<Room, "id" | "name" | "createdAt"> & {
 };
 
 export const roomNameSchema = z.string()
-  .min(4, "Room name must be at least 5 characters long")
+  .min(5, "Room name must be at least 5 characters long")
   .max(20, "Room name must be at most 20 characters long");
 
 export const RoomSchema: toZod<RoomModel> = z.object({

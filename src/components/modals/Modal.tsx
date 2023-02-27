@@ -76,7 +76,7 @@ export function SimpleModal() {
       <label id={ModalId} htmlFor={ModalTriggerId} className="modal cursor-pointer">
         <label className="modal-box flex flex-col justify-center items-center" htmlFor="">
           <h2 className="title text-2xl font-bold">{modalTitle}</h2>
-          <p className="message py-4 w-full text-center">{modalContent}</p>
+          <div className="message py-4 w-full text-center">{modalContent}</div>
           {
             showButtons &&
             <div id="buttons" className="pt-2 flex items-center justify-end">
