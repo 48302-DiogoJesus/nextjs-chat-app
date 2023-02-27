@@ -18,8 +18,7 @@ export default async function ProtectSSRPage(context: NextPageContext) {
 
     return {
       redirect: {
-        destination:
-          `/api/auth/signin?callbackUrl=${process.env.NEXT_PUBLIC_APP_URL}${req.url}`,
+        destination: "/",
         permanent: false,
       },
     };
