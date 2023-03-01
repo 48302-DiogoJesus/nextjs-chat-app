@@ -2,7 +2,8 @@
 module.exports = {
   mode: 'jit',
   content: [
-    "./src/**/*.{js,ts,jsx,tsx}",
+    "./app/**/*.{js,ts,jsx,tsx}",
+    "./_resources/icons.tsx"
   ],
   theme: {
     extend: {

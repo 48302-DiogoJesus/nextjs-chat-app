@@ -45,7 +45,8 @@
 - [x] Deploy UI on vercel
 - [ ] Deploy Web Sockets Server somewhere and add to env NEXT_PUBLIC_WS_PORT + NEXT_PUBLIC_WS_URL
 
-- [ ] More UI Loaders 
+- [ ] More UI Loaders
+- [ ] Optimistic UI operations
 
 Features:
 - [ ] Allow users to change their username (apply constraints with ZOD)
